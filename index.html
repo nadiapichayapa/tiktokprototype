@@ -1,0 +1,1127 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Lash Shop Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: phone app on the left (full screen on a phone), touchpoint guide on the right */
+:root{
+  --bg:#efedf2; --fg:#1b1820; --muted:#6c6675; --line:#dedae4; --panel:#fff;
+  --red:#ee2f53; --red-d:#c81e40; --red-soft:#ffe9ee; --new:#7b3fe4; --new-soft:#f1eaff; --imp:#0b8a7a; --imp-soft:#e3f6f3;
+  --a-bg:#fff; --a-fg:#161318; --a-mut:#86808e; --a-line:#efecf2; --a-soft:#f6f5f8; --gold:#f5b301; --ok:#18a058; --diff:#fff4cc;
+  --f:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141218;--fg:#eeeaf3;--muted:#a49cb0;--line:#2c2833;--panel:#1d1a22;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141218;--fg:#eeeaf3;--muted:#a49cb0;--line:#2c2833;--panel:#1d1a22;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--fg);font-family:var(--f);font-size:14px;line-height:1.5}
+button{font:inherit;color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding-block:24px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;justify-content:center}
+.phone{width:390px;height:820px;border-radius:46px;background:#0c0b0e;padding:11px;box-shadow:0 24px 60px -24px rgba(20,10,30,.5);position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.scr{position:relative;width:100%;height:100%;border-radius:36px;overflow:hidden;background:var(--a-bg);color:var(--a-fg);display:flex;flex-direction:column;color-scheme:light}
+.wrap{padding-block:24px}.phone{width:417px;height:876px;flex:none;top:0;box-sizing:border-box;background:linear-gradient(145deg,#f4f4f6 0%,#b9bbc2 18%,#e9eaee 45%,#8e9099 75%,#d9dadf 100%);padding:12px;border-radius:60px;position:relative}
+.phone::before{content:"";position:absolute;inset:3px;border-radius:57px;background:#0c0b0e}
+.phone .scr{box-shadow:0 0 0 1px #0c0b0e;border-radius:50px}
+.isl{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000;z-index:999;pointer-events:none}
+.isl::after{content:"";position:absolute;right:13px;top:12px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#34405e,#05070c 70%)}
+.pbtn{position:absolute;width:4px;border-radius:2px;background:linear-gradient(90deg,#9a9ca4,#d8d9de)}
+.pbtn.b1{left:-3px;top:140px;height:32px}.pbtn.b2{left:-3px;top:200px;height:62px}.pbtn.b3{left:-3px;top:275px;height:62px}.pbtn.b4{right:-3px;top:220px;height:96px}
+@media (max-width:500px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding:0;gap:0}
+  .phone{width:100%;height:100dvh;aspect-ratio:auto;border-radius:0;padding:0;position:relative;top:0;box-shadow:none;background:none}.wrap{padding:0}.phone::before,.pbtn{display:none}.phone .scr{border-radius:0}
+  .scr{border-radius:0}
+  .guide{padding:20px max(16px,env(safe-area-inset-left,0px)) 32px max(16px,env(safe-area-inset-right,0px))}
+}
+/* guide */
+.guide h1{font-size:1.45rem;line-height:1.25;margin:0 0 6px;text-wrap:balance}
+.guide p{margin:0 0 8px;color:var(--muted);max-width:62ch}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+.tp{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.tp li{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.tp li.on{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.tp .h{display:flex;gap:10px;align-items:baseline}
+.tp .n{font-weight:700;color:var(--red);font-variant-numeric:tabular-nums;min-width:34px}
+.tp b{font-weight:600}
+.tp .ty{margin-left:auto;font-size:.72rem;color:var(--muted)}
+.tp .jumps{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tp .jumps button{border:1px solid var(--line);background:transparent;border-radius:99px;padding:2px 10px;font-size:.78rem;cursor:pointer}
+.tp .jumps button:hover{border-color:var(--red);color:var(--red)}
+.tp .fx{font-size:.78rem;color:var(--muted);margin-top:4px}
+.sol{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.sol h3{margin:0 0 6px;font-size:.95rem}
+.sol ol{margin:0;padding-left:20px;font-size:.85rem}
+.small{font-size:.78rem;color:var(--muted);margin-top:12px}
+/* badges */
+.bN,.bI{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;font-weight:700;padding:1px 7px;border-radius:99px;white-space:nowrap;vertical-align:middle;line-height:1.5}
+.bN{background:var(--new-soft);color:var(--new)}
+.bI{background:var(--imp-soft);color:var(--imp)}
+/* app chrome */
+.sb{height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 26px;font-size:.8rem;font-weight:600;position:relative;z-index:5}
+.sbt{font-size:15px;font-weight:600;letter-spacing:-.2px;font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;width:72px;text-align:center}.sbi{display:flex;align-items:center;gap:6px;width:84px;justify-content:center}.sb{height:52px;padding:0 22px 0 26px}
+.sb.dark{color:#fff;position:absolute;top:0;left:0;right:0}
+.view{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;position:relative}
+.view::-webkit-scrollbar{width:0}
+.top{display:flex;align-items:center;gap:6px;padding:4px 10px 8px;background:var(--a-bg);border-bottom:1px solid var(--a-line);flex:none}
+.top h2{margin:0;font-size:1rem;font-weight:600;flex:1;text-align:center}
+.top .sp{width:36px}
+.ib{border:0;background:transparent;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;cursor:pointer;flex:none;position:relative}
+.ib svg{width:22px;height:22px}
+.dot{position:absolute;top:2px;right:0;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;border-radius:99px;padding:0 5px;line-height:1.5}
+.bar{flex:none;border-top:1px solid var(--a-line);padding:8px 12px 22px;display:flex;gap:8px;align-items:center;background:var(--a-bg)}
+.btn{border:0;cursor:pointer;border-radius:10px;padding:11px 12px;font-weight:600;font-size:.9rem;flex:1;text-align:center;line-height:1.25}
+.btn.p{background:var(--red);color:#fff}
+.btn.s{background:var(--a-soft);color:var(--a-fg)}
+.btn.o{background:#fff;border:1px solid var(--red);color:var(--red)}
+.ycart{border:0;cursor:pointer;flex:none;width:68px;height:46px;border-radius:999px;background:#fdecef;color:#e2445c;display:grid;place-items:center}
+.bar .btn.p{border-radius:999px;background:#e8445a;min-height:46px}
+.bar .btn.p .sub{opacity:.75}
+.ycart svg{width:26px;height:26px}
+.mini.cmpb{color:var(--a-fg)}
+.btn.sm{padding:7px 10px;font-size:.8rem;flex:none}
+.btn .sub{display:block;font-size:.66rem;font-weight:400;opacity:.9}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.mini{border:0;background:transparent;cursor:pointer;display:grid;justify-items:center;gap:1px;font-size:.66rem;color:var(--a-fg);padding:0 4px;flex:none}
+.mini svg{width:22px;height:22px}
+:focus-visible{outline:2px solid var(--new);outline-offset:2px}
+.pad{padding:12px 14px}
+.card{background:#fff;border-radius:12px}
+.sec{background:#fff;padding:12px 14px;border-bottom:8px solid var(--a-soft)}
+.mut{color:var(--a-mut);font-size:.78rem}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chips::-webkit-scrollbar{height:0}
+.chip{border:1px solid var(--a-line);background:#fff;border-radius:99px;padding:5px 11px;font-size:.78rem;white-space:nowrap;cursor:pointer}
+.chip.on{border-color:var(--red);color:var(--red);background:var(--red-soft);font-weight:600}
+.price{color:var(--red);font-weight:700}
+.strike{text-decoration:line-through;color:var(--a-mut);font-size:.75rem}
+.vtag{display:inline-block;background:var(--a-soft);border-radius:6px;padding:2px 8px;font-size:.74rem;margin-top:3px}
+.vtag.hl{background:var(--red-soft);color:var(--red-d);font-weight:600}
+.thumb{border-radius:8px;object-fit:cover;background:#f3eef1;flex:none;display:block}
+.stars{color:var(--gold);letter-spacing:1px}
+.snack{position:absolute;left:12px;right:12px;bottom:84px;background:#1b1820;color:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:.82rem;z-index:30;animation:up .2s ease-out}
+.snack span{flex:1}
+.snack button{border:0;background:var(--red);color:#fff;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer}
+.toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(20,18,24,.9);color:#fff;font-size:.85rem;padding:10px 16px;border-radius:12px;max-width:80%;text-align:center;pointer-events:none;opacity:0;transition:opacity .2s;z-index:50}
+.toast.show{opacity:1}
+/* sheet */
+.shade{position:absolute;inset:0;background:rgba(10,8,14,.45);z-index:20;display:flex;flex-direction:column;justify-content:flex-end}
+.sheet{background:#fff;border-radius:16px 16px 0 0;max-height:88%;display:flex;flex-direction:column;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.4}}
+.sheet .sv{overflow-y:auto;padding:12px 14px;min-height:0}
+.sheet .sh{display:flex;gap:10px;padding:12px 14px 10px;border-bottom:1px solid var(--a-line);align-items:flex-start}
+/* feed */
+.feed{position:absolute;inset:0;background:#000}
+.feed img.bgv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ftabs{position:absolute;top:46px;left:0;right:0;display:flex;justify-content:center;gap:18px;color:rgba(255,255,255,.75);font-weight:600;z-index:3}
+.ftabs button{background:none;border:0;color:inherit;cursor:pointer;padding:4px 0}
+.ftabs .on{color:#fff;border-bottom:2px solid #fff}
+.fside{position:absolute;right:8px;bottom:190px;display:grid;gap:16px;justify-items:center;color:#fff;z-index:3}
+.fside button{background:none;border:0;color:#fff;display:grid;justify-items:center;font-size:.7rem;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.fside svg{width:32px;height:32px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.fside .av{width:44px;height:44px;border-radius:50%;border:2px solid #fff;background:linear-gradient(135deg,#f7a1bb,#c64f7f);display:grid;place-items:center;font-weight:700}
+.fcap{position:absolute;left:12px;right:70px;bottom:94px;color:#fff;z-index:3;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.fcap b{font-size:.95rem}
+.fcap p{margin:2px 0 0;font-size:.82rem}
+.anchor{display:flex;gap:10px;align-items:center;background:rgba(40,40,46,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;border-radius:12px;padding:8px 12px 8px 8px;margin-bottom:10px;cursor:pointer;border:0;max-width:100%;text-align:left;text-shadow:none}
+.anchor b{display:block;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.anchor span:not(.bagbig){display:block;font-size:.74rem;color:rgba(255,255,255,.7)}
+.bagbig{width:34px;height:34px;border-radius:8px;background:#f8c51c;display:grid;place-items:center;flex:none}
+.bag{background:#f6c700;border-radius:6px;width:22px;height:22px;display:grid;place-items:center;flex:none}
+.vidtxt{position:absolute;left:0;right:0;top:44%;text-align:center;color:#fff;z-index:2;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,.6),0 0 2px #000}
+.vidtxt .big{font-size:2.2rem;letter-spacing:1px;display:block}
+.prog{position:absolute;left:0;right:0;bottom:62px;height:2px;background:rgba(255,255,255,.25);z-index:3}
+.prog i{display:block;height:100%;background:#fff;width:0;animation:pg 12s linear infinite}
+@keyframes pg{to{width:100%}}
+.nav{position:absolute;left:0;right:0;bottom:0;height:62px;display:flex;justify-content:space-around;align-items:flex-start;padding-top:6px;background:#000;color:#fff;z-index:4}
+.nav.light{background:#fff;color:#111;border-top:1px solid var(--a-line);position:static;flex:none}
+.nav button{background:none;border:0;color:inherit;display:grid;justify-items:center;font-size:.66rem;cursor:pointer;position:relative}
+.nav svg{width:24px;height:24px}
+.plus{width:44px;height:28px;border-radius:8px;background:#fff;color:#000;display:grid;place-items:center;box-shadow:-3px 0 0 #25f4ee,3px 0 0 #fe2c55}
+/* product */
+.gal{position:relative;background:#f5eef1}
+.gal img{width:100%;aspect-ratio:1/1;display:block;object-fit:cover}
+.gal .cnt{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.72rem;border-radius:99px;padding:1px 9px}
+.gal .fromv{position:absolute;left:10px;top:10px}
+.pbanner{background:linear-gradient(90deg,var(--red),#ff6a3d);color:#fff;padding:8px 14px;display:flex;align-items:center;gap:10px}
+.pbanner .pp{font-size:1.35rem;font-weight:700}
+.ptabs{display:flex;gap:18px;padding:0 14px;border-bottom:1px solid var(--a-line);background:#fff;position:sticky;top:0;z-index:3}
+.ptabs button{border:0;background:none;padding:10px 0;cursor:pointer;color:var(--a-mut);font-weight:500}
+.ptabs .on{color:var(--a-fg);font-weight:600;box-shadow:inset 0 -2px 0 var(--a-fg)}
+.vstrip{display:flex;gap:6px;overflow-x:auto;margin-top:8px}
+.vstrip::-webkit-scrollbar{height:0}
+.vstrip button{border:1px solid var(--a-line);background:#fff;border-radius:8px;padding:3px;cursor:pointer;flex:none;width:62px;font-size:.62rem;text-align:center}
+.vstrip img{width:100%;aspect-ratio:1;border-radius:6px;display:block;object-fit:cover}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.tools button{border:1px solid #e2d6fb;background:var(--new-soft);color:#4b1fa6;border-radius:10px;padding:8px 4px;font-size:.74rem;font-weight:600;cursor:pointer;display:grid;justify-items:center;gap:2px}
+.tools svg{width:20px;height:20px}
+.spec{width:100%;border-collapse:collapse;font-size:.8rem}
+.spec td{padding:6px 4px;border-bottom:1px solid var(--a-line);vertical-align:top}
+.spec td:first-child{color:var(--a-mut);width:38%}
+.rev{padding:10px 0;border-bottom:1px solid var(--a-line)}
+.rev .who{display:flex;gap:8px;align-items:center;font-size:.8rem}
+.rev .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:.7rem;font-weight:700}
+.rev p{margin:4px 0;font-size:.82rem}
+.rev .ph{display:flex;gap:6px}
+.rev .ph img{width:84px;height:84px}
+.rbar{display:grid;grid-template-columns:60px 1fr 46px;gap:6px;align-items:center;font-size:.74rem}
+.rbar .tr{height:6px;background:var(--a-line);border-radius:3px;overflow:hidden}
+.rbar .tr i{display:block;height:100%;background:var(--gold)}
+.ai{background:var(--a-soft);border-radius:10px;padding:8px 10px;font-size:.8rem;margin-top:8px}
+/* variant sheet */
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vc{border:1px solid var(--a-line);border-radius:10px;padding:4px 4px 6px;background:#fff;cursor:pointer;text-align:center;position:relative}
+.vc img{width:100%;aspect-ratio:1;border-radius:7px;display:block;object-fit:cover}
+.vc b{display:block;font-size:.78rem;margin-top:3px}
+.vc span{display:block;font-size:.66rem;color:var(--a-mut);line-height:1.3}
+.vc.on{border-color:var(--red);box-shadow:0 0 0 1.5px var(--red)}
+.vc .ck{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:.7rem;display:grid;place-items:center}
+.vc .zoom{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.5);color:#fff;border:0;border-radius:6px;width:22px;height:22px;display:grid;place-items:center;cursor:pointer}
+.opt{display:flex;gap:8px;flex-wrap:wrap}
+.opt button{border:1px solid var(--a-line);background:var(--a-soft);border-radius:8px;padding:7px 12px;font-size:.8rem;cursor:pointer}
+.opt button.on{border-color:var(--red);color:var(--red);background:var(--red-soft);font-weight:600}
+.opt button:disabled{opacity:.45;text-decoration:line-through;cursor:not-allowed}
+.lbl{font-weight:600;font-size:.85rem;margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+.alert{background:#fff4f0;border:1px solid #ffc8b8;color:#b3261e;border-radius:8px;padding:7px 10px;font-size:.78rem;margin-top:10px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--a-line);border-radius:8px;overflow:hidden}
+.qty button{border:0;background:var(--a-soft);width:30px;height:28px;cursor:pointer;font-weight:700}
+.qty span{min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
+/* compare */
+.sw{border:0;width:40px;height:23px;border-radius:99px;background:#cfc9d6;position:relative;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:left .15s}
+.sw[aria-checked="true"]{background:var(--red)}
+.sw[aria-checked="true"]::after{left:20px}
+.cg{display:grid;gap:6px}
+.ch{border:1px solid var(--a-line);border-radius:10px;padding:5px;text-align:center;cursor:pointer;background:#fff;position:relative}
+.ch.on{border-color:var(--red);box-shadow:0 0 0 1.5px var(--red)}
+.ch img{width:100%;aspect-ratio:1;border-radius:7px;display:block;object-fit:cover}
+.ch img.eye{aspect-ratio:3/2;margin-top:4px}
+.ch b{font-size:.8rem;display:block;margin-top:3px}
+.crow{margin-top:8px}
+.crow .k{font-size:.7rem;color:var(--a-mut);margin:0 2px 3px;display:flex;gap:6px;align-items:center}
+.crow .k em{font-style:normal;font-size:.6rem;background:var(--gold);color:#3b2a00;padding:0 6px;border-radius:99px;font-weight:700}
+.crow .vv{display:grid;gap:6px}
+.crow .vv div{font-size:.76rem;padding:6px 4px;border-radius:8px;background:var(--a-soft);text-align:center;line-height:1.35}
+.crow.d .vv div{background:var(--diff)}
+.crow .vv div.sel{box-shadow:inset 0 0 0 2px var(--red)}
+.lic{width:26px;height:26px;border-radius:8px;background:#fdecef;color:#e8445a;display:inline-grid;place-items:center;flex:none}.lic svg{width:15px;height:15px}
+.okhero{background:linear-gradient(160deg,#ff5d73,#e8445a 55%,#c9304a);color:#fff;text-align:center;padding:22px 16px 26px;border-radius:0 0 26px 26px}
+.okhero b{display:block;font-size:1.25rem;margin-top:6px}.okhero p{margin:2px 0 0;font-size:.78rem;opacity:.9}
+.okring{width:92px;height:92px;margin:0 auto;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;animation:okpop .5s ease-out}
+.okhero .big-ok{margin:0;background:#fff;color:#e8445a;width:66px;height:66px}.okhero .big-ok svg{width:34px;height:34px}
+@keyframes okpop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.okamt{font-size:1.7rem;font-weight:800;margin-top:10px}.okpay{display:inline-block;margin-top:4px;font-size:.7rem;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:99px}
+.okcard{background:#fff;margin:12px 12px 0;border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(40,20,60,.06)}
+.okhero+.okcard{margin-top:-14px;position:relative}
+.oksteps{display:grid;grid-template-columns:repeat(4,1fr);margin-top:14px;position:relative}
+.oksteps::before{content:"";position:absolute;top:12px;left:12%;right:12%;height:2px;background:#eee8ef}
+.oksteps div{text-align:center;position:relative}.oksteps i{display:grid;place-items:center;width:26px;height:26px;margin:0 auto;border-radius:50%;background:#f1edf3;color:#8a8292;font-style:normal;font-size:.72rem;font-weight:700;border:2px solid #fff}
+.oksteps .on i{background:#e8445a;color:#fff}.oksteps b{display:block;font-size:.66rem;margin-top:5px}.oksteps small{display:block;font-size:.58rem;color:var(--a-mut)}
+.oknote{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:10px;border-radius:12px;background:#fff6f7;font-size:.76rem;line-height:1.45}
+.oknote .lic svg,.okaddr .lic svg{width:15px;height:15px}
+.okaddr{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding-top:12px;border-top:1px dashed #eee;font-size:.76rem;line-height:1.45}
+.okrec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.okrec button{border:1px solid #f0ecf2;background:#fff;border-radius:12px;padding:0 0 8px;text-align:left;cursor:pointer;overflow:hidden;font:inherit}
+.okrec img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.okrec span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.72rem;margin:6px 8px 2px;line-height:1.3}.okrec b{color:#e8445a;font-size:.8rem;margin:0 8px}
+.cview{background:#f6f4f8}
+.csum{margin:10px 12px 0;padding:12px;border-radius:14px;background:linear-gradient(135deg,#fff1f3,#fff8e6);border:1px solid #f6d9de}
+.csum-t{display:flex;gap:10px;align-items:center}.csum-t b{display:block;font-size:.92rem}.csum-t small{font-size:.68rem;color:var(--a-mut)}
+.csum-i svg{width:18px;height:18px}.csum-i{width:34px;height:34px;border-radius:50%;background:#e8445a;color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+.csum-c{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.csum-c span{font-size:.66rem;background:var(--diff);color:#5a4300;padding:2px 8px;border-radius:99px;font-weight:600}
+.cview .ch{border-radius:14px;padding:6px 6px 8px;box-shadow:0 2px 8px rgba(40,20,60,.07);border-color:#ece7f0;transition:box-shadow .15s}
+.cview .ch.on{border-color:#e8445a;box-shadow:0 0 0 2px #e8445a,0 6px 16px rgba(232,68,90,.18)}
+.ch .chk{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:#e8445a;color:#fff;font-size:.72rem;display:grid;place-items:center;border:2px solid #fff;z-index:2}
+.ch .tags{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:3px;align-items:flex-start;z-index:1}
+.ch .tg{font-size:.56rem;background:#e8445a;color:#fff;padding:1px 6px;border-radius:99px;font-weight:700}.ch .tg.r{background:#2c9b5f}
+.ch .cst{display:block;font-size:.66rem;color:var(--a-mut)}
+.ch .cpr{display:block;color:#e8445a;font-weight:800;font-size:.9rem;margin-top:3px}
+.ch .crt{display:block;font-size:.64rem;color:#d79a00}.ch .crt span{color:var(--a-mut)}
+.cstick{position:sticky;top:0;z-index:3;display:grid;gap:6px;margin:10px -12px 0;padding:6px 12px;background:rgba(246,244,248,.94);backdrop-filter:blur(6px);border-bottom:1px solid #ebe6ef}
+.cstick span{display:flex;align-items:center;justify-content:center;gap:4px;font-size:.66rem;font-weight:700;color:#4a4352}
+.cstick span.on{color:#e8445a}.cstick img{width:18px;height:18px;border-radius:5px;object-fit:cover}
+.conly{margin-top:8px;padding:8px 12px;background:#fff;border-radius:12px;font-size:.78rem;border:1px solid #ece7f0}
+.cview .crow{margin-top:8px;background:#fff;border-radius:12px;padding:8px;border:1px solid #ece7f0}
+.cview .crow.d{border-color:#f1dc8f}
+.cview .crow .k{font-weight:600;color:#3b3444;margin:0 0 6px}
+.crow .k u{text-decoration:none;font-size:.58rem;color:var(--a-mut);background:#f1eef4;padding:0 6px;border-radius:99px;margin-left:auto}
+.crow .k em{margin-left:auto}
+.cico{width:22px;height:22px;border-radius:7px;background:#fdecef;color:#e8445a;display:grid;place-items:center;flex:none}.cico svg{width:14px;height:14px}
+.cview .crow .vv div{background:#f7f5f9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:34px}
+.cview .crow.d .vv div{background:var(--diff)}
+.cview .crow .vv div small{font-size:.68rem;line-height:1.3}
+.cmt{position:relative;display:block;width:86%;height:6px;border-radius:99px;background:rgba(0,0,0,.08)}
+.cmt i{position:absolute;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,#ff8a9b,#e8445a);min-width:6px}
+.cdots{display:flex;gap:3px}.cdots i{width:12px;height:6px;border-radius:99px;background:rgba(0,0,0,.1)}.cdots i.on{background:#e8445a}
+.pick{display:grid;grid-template-columns:60px minmax(0,1fr) 24px;gap:10px;align-items:center;padding:8px;border:1px solid var(--a-line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:#fff;width:100%;text-align:left}
+.pick.on{border-color:var(--red);background:var(--red-soft)}
+.box{width:22px;height:22px;border-radius:6px;border:2px solid #c9c2d2;display:grid;place-items:center;color:#fff;font-size:.8rem}
+.pick.on .box{background:var(--red);border-color:var(--red)}
+/* finder */
+.q{font-weight:600;font-size:1.05rem;margin:6px 0 12px}
+.ans{display:grid;gap:8px}
+.ans button{border:1px solid var(--a-line);background:#fff;border-radius:12px;padding:12px;text-align:left;cursor:pointer;display:flex;gap:10px;align-items:center}
+.ans button:hover{border-color:var(--red)}
+.ans small{display:block;color:var(--a-mut);font-size:.74rem}
+.stepbar{display:flex;gap:4px}
+.stepbar i{flex:1;height:4px;border-radius:2px;background:var(--a-line)}
+.stepbar i.on{background:var(--red)}
+.reco{border:1.5px solid var(--red);border-radius:14px;overflow:hidden}
+.reco img{width:100%;display:block}
+.why{margin:8px 0 0;padding-left:18px;font-size:.82rem}
+/* try on */
+.tryimg{position:relative}
+.tryimg img{width:100%;display:block}
+.tryimg .lbl2{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.72rem;border-radius:99px;padding:2px 10px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.split div{position:relative}
+.split img{width:100%;display:block;border-radius:8px}
+.split span{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;font-size:.68rem;border-radius:99px;padding:0 8px}
+/* chat */
+.chatv{background:#f4f3f6;padding:12px}
+.msg{max-width:78%;padding:8px 11px;border-radius:14px;margin:6px 0;font-size:.84rem;line-height:1.45}
+.msg.me{background:var(--red);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.msg.them{background:#fff;border-bottom-left-radius:4px}
+.msg .auto{display:block;font-size:.64rem;color:var(--imp);font-weight:600;margin-bottom:2px}
+.pcard{display:flex;gap:8px;background:#fff;border-radius:10px;padding:8px;align-items:center;font-size:.78rem}
+.cin{flex:1;border:1px solid var(--a-line);border-radius:99px;padding:8px 14px;font:inherit;font-size:.85rem;min-width:0;background:var(--a-soft)}
+/* cart */
+.shop{background:#fff;margin-bottom:8px;padding:10px 12px}
+.ci{display:grid;grid-template-columns:22px 80px minmax(0,1fr);gap:8px;padding:8px 0;align-items:start}
+.cb{width:20px;height:20px;border-radius:50%;border:1.5px solid #c9c2d2;display:grid;place-items:center;cursor:pointer;background:#fff;padding:0;margin-top:28px;color:#fff;font-size:.7rem}
+.cb.on{background:var(--red);border-color:var(--red)}
+.ci .nm{font-size:.8rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.oos{opacity:.5}
+.search{display:flex;gap:6px;align-items:center;background:var(--a-soft);border-radius:10px;padding:7px 10px;border:1px solid var(--a-line)}
+.search input{border:0;background:transparent;font:inherit;flex:1;min-width:0;font-size:.85rem;outline:none}
+/* checkout */
+.addr{display:flex;gap:8px;font-size:.8rem;cursor:pointer;background:none;border:0;width:100%;text-align:left;padding:0}
+.stripe{height:3px;background:repeating-linear-gradient(90deg,var(--red) 0 14px,transparent 14px 20px,#5aa0ff 20px 34px,transparent 34px 40px)}
+.sum{display:grid;grid-template-columns:1fr auto;gap:5px 10px;font-size:.82rem}
+.sum .neg{color:var(--red)}
+.sum .tot{font-weight:700;font-size:.95rem;padding-top:6px;border-top:1px solid var(--a-line)}
+.sum .tot+.tot{border-top:1px solid var(--a-line)}
+.pm{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--a-line);cursor:pointer;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left}
+.pm .ic{width:30px;height:22px;border-radius:5px;display:grid;place-items:center;font-size:.6rem;font-weight:700;color:#fff;flex:none}
+.rd{width:20px;height:20px;border-radius:50%;border:1.5px solid #c9c2d2;margin-left:auto;flex:none;display:grid;place-items:center}
+.rd.on{border-color:var(--red)}
+.rd.on::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--red)}
+.cpn{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #cdeee9;background:#f1fbf9;border-radius:10px;padding:10px;margin-bottom:8px}
+.cpn.no{background:var(--a-soft);border-color:var(--a-line)}
+.cpn .l{color:var(--imp);font-weight:700;font-size:.72rem;text-align:center;border-right:1px dashed #b6dcd6;padding-right:8px}
+.cpn.no .l{color:var(--a-mut)}
+.cpn .why{list-style:none;padding:0;margin:4px 0 0;color:#b3261e;font-size:.72rem}
+/* orders */
+.otabs{display:grid;grid-template-columns:repeat(5,1fr);text-align:center;font-size:.7rem;padding:10px 4px;background:#fff}
+.otabs button{background:none;border:0;cursor:pointer;display:grid;justify-items:center;gap:3px;position:relative;padding:0}
+.otabs svg{width:24px;height:24px}
+.otabs .on{color:var(--red);font-weight:600}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;position:relative;padding-bottom:14px}
+.tl li::before{content:"";position:absolute;left:10px;top:20px;bottom:0;width:2px;background:var(--a-line)}
+.tl li:last-child::before{display:none}
+.tl .c{width:22px;height:22px;border-radius:50%;background:var(--a-line);display:grid;place-items:center;font-size:.7rem;color:#fff}
+.tl li.done .c{background:var(--ok)}
+.tl li.now .c{background:var(--red);box-shadow:0 0 0 4px var(--red-soft)}
+.tl b{font-size:.84rem;display:block}
+.tl span{font-size:.74rem;color:var(--a-mut)}
+.prog2{display:flex;gap:4px;margin:10px 0 4px}
+.prog2 i{flex:1;height:5px;border-radius:3px;background:var(--a-line)}
+.prog2 i.on{background:var(--ok)}
+.chk{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--a-line);cursor:pointer;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;font-size:.84rem}
+.chk .b{width:22px;height:22px;border-radius:6px;border:2px solid #c9c2d2;display:grid;place-items:center;flex:none;color:#fff;font-size:.75rem}
+.chk.on .b{background:var(--ok);border-color:var(--ok)}
+.big-ok{width:68px;height:68px;border-radius:50%;background:#e6f6ec;color:var(--ok);display:grid;place-items:center;margin:20px auto 8px;font-size:2rem}
+.upl{width:84px;height:84px;border:1.5px dashed #c9c2d2;border-radius:10px;display:grid;place-items:center;color:var(--a-mut);font-size:.7rem;cursor:pointer;background:#fff;text-align:center}
+.starsel button{border:0;background:none;font-size:1.8rem;color:#ddd;cursor:pointer;padding:0 2px}
+.starsel button.on{color:var(--gold)}
+textarea.ta{width:100%;border:1px solid var(--a-line);border-radius:10px;padding:10px;font:inherit;font-size:.85rem;min-height:80px;resize:vertical;background:var(--a-soft)}
+.home-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center;font-size:.66rem;padding:10px 8px;background:#fff}
+.home-grid button{background:none;border:0;cursor:pointer;display:grid;justify-items:center;gap:3px;padding:0}
+.home-grid i{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:#fff}
+.home-grid i svg{width:22px;height:22px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px}
+.pi{background:#fff;border-radius:8px;overflow:hidden;cursor:pointer;border:0;padding:0;text-align:left}
+.pi img{width:100%;aspect-ratio:1;display:block;object-fit:cover}
+.pi div{padding:6px 8px 8px;font-size:.76rem;line-height:1.35}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head><body><div class="wrap">
+  <div class="phone"><div class="scr" id="scr">
+    <div id="app" style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative"></div>
+    <div id="sheet"></div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="isl" aria-hidden="true"></div>
+  </div><i class="pbtn b1"></i><i class="pbtn b2"></i><i class="pbtn b3"></i><i class="pbtn b4"></i></div>
+
+</div>
+
+<script>
+/* ---------- data ---------- */
+const VAR={
+ NEL001:{st:"Natural",th:"ธรรมชาติ",len:"8–10 มม.",thick:"บาง",curl:"C งอนน้อย",cnt:"120 ช่อ",fit:"ใช้ทุกวัน  มือใหม่",price:99,rate:4.8,rc:2140,lvl:"ง่ายมาก",p:{L:.5,n:8,sp:.32,c:.12,w:.85}},
+ NEL002:{st:"Natural Plus",th:"ธรรมชาติ+วอลุ่ม",len:"9–11 มม.",thick:"ปานกลาง",curl:"C งอนน้อย",cnt:"150 ช่อ",fit:"ทำงาน  เรียน",price:99,rate:4.8,rc:1210,lvl:"ง่าย",p:{L:.58,n:11,sp:.38,c:.16,w:.95}},
+ NEL003:{st:"Doll",th:"ตาโตแบบตุ๊กตา",len:"10–12 มม.",thick:"ปานกลาง",curl:"D งอนมาก",cnt:"180 ช่อ",fit:"ถ่ายรูป  ออกงาน",price:109,rate:4.7,rc:1532,lvl:"ง่าย",p:{L:.68,n:12,sp:.44,c:.34,w:1}},
+ NEL004:{st:"Doll Mix",th:"ตุ๊กตาคละความยาว",len:"10–13 มม. (คละ)",thick:"ปานกลาง",curl:"D งอนมาก",cnt:"200 ช่อ",fit:"ออกงาน  ลุคหวาน",price:109,rate:4.7,rc:640,lvl:"ปานกลาง",p:{L:.72,n:13,sp:.5,c:.34,w:1,mix:1}},
+ NEL005:{st:"Glam",th:"ฟูหนาจัดเต็ม",len:"12–15 มม.",thick:"หนา",curl:"D+ งอนมาก",cnt:"240 ช่อ",fit:"ปาร์ตี้  กลางคืน",price:119,rate:4.6,rc:905,lvl:"ปานกลาง",p:{L:.88,n:18,sp:.5,c:.4,w:1.25}},
+ NEL006:{st:"Fox",th:"หางตาเฉี่ยว",len:"9–14 มม. (ยาวที่หางตา)",thick:"ปานกลาง",curl:"C+ ยกหางตา",cnt:"160 ช่อ",fit:"ลุคเฉี่ยว  ถ่ายรูป",price:119,rate:4.7,rc:488,lvl:"ปานกลาง",p:{L:.7,n:12,sp:.38,c:.22,w:1,fox:1}}
+};
+const IDS=Object.keys(VAR);
+const NUM={NEL001:{l:[8,10],t:1,c:1,n:120},NEL002:{l:[9,11],t:2,c:1,n:150},NEL003:{l:[10,12],t:2,c:3,n:180},NEL004:{l:[10,13],t:2,c:3,n:200},NEL005:{l:[12,15],t:3,c:3,n:240},NEL006:{l:[9,14],t:2,c:2,n:160}};
+const STOCK={NEL001:{no:120,tw:80},NEL002:{no:64,tw:40},NEL003:{no:88,tw:52},NEL004:{no:30,tw:12},NEL005:{no:22,tw:3},NEL006:{no:18,tw:0}};
+const TW=20, ORIG=258;
+const CROWS=[["st","สไตล์"],["len","ความยาวขนตา"],["thick","ความหนา"],["curl","ความงอน"],["cnt","จำนวนในกล่อง"],["fit","เหมาะกับ"],["lvl","ความง่ายในการติด"],["glue","กาว"],["rv","รีวิวของรุ่นนี้"],["pr","ราคา"]];
+const cval=(id,k)=>k==="glue"?"มีกาวในตัว (กาวดำ)":k==="rv"?`★${VAR[id].rate} (${VAR[id].rc.toLocaleString()})`:k==="pr"?"฿"+VAR[id].price:k==="st"?VAR[id].st+"<br><small>"+VAR[id].th+"</small>":VAR[id][k];
+const REVIEWS=[
+ {u:"p***m",c:"#e57399",v:"NEL001",o:"ไม่รวมแหนบ",s:5,t:"ใส่แล้วธรรมชาติมาก ติดง่าย มือใหม่ทำได้ภายใน 10 นาที ใส่ไปทำงานไม่มีใครรู้เลย",ph:1},
+ {u:"k***a",c:"#7a8be0",v:"NEL003",o:"รวมแหนบ",s:5,t:"ตาโตขึ้นเยอะ ถ่ายรูปสวย ความยาวกำลังดี แหนบที่ให้มาใช้ง่าย",ph:1},
+ {u:"n***y",c:"#41a88f",v:"NEL005",o:"ไม่รวมแหนบ",s:4,t:"ฟูหนาตามรูป เหมาะกับไปปาร์ตี้ ถ้าใส่ทุกวันอาจดูเยอะไป",ph:1},
+ {u:"j***e",c:"#d89a3c",v:"NEL006",o:"ไม่รวมแหนบ",s:5,t:"หางตาเฉี่ยวสวยมาก แต่ต้องดูด้านให้ดี ช่อยาวอยู่ด้านหางตา",ph:1},
+ {u:"m***o",c:"#9a6ad4",v:"NEL002",o:"รวมแหนบ",s:5,t:"หนากว่า 001 นิดนึง ใส่เรียนได้ ชอบมาก",ph:0},
+ {u:"b***s",c:"#e0694e",v:"NEL004",o:"ไม่รวมแหนบ",s:4,t:"คละความยาวทำให้ดูหวาน แต่ต้องใช้เวลาจัดเรียงหน่อย",ph:1},
+ {u:"t***n",c:"#5c9bd1",v:"NEL003",o:"ไม่รวมแหนบ",s:5,t:"ซื้อซ้ำรอบที่ 3 แล้ว สีกาวดำกลืนกับอายไลเนอร์",ph:0},
+ {u:"a***r",c:"#e88a3c",v:"NEL005",o:"รวมแหนบ",s:5,t:"ไปคอนเสิร์ตมา ถ่ายรูปออกมาตาเด่นมาก กาวติดทั้งคืนไม่หลุดเลย",ph:1},
+ {u:"f***n",c:"#4aa3a0",v:"NEL002",o:"ไม่รวมแหนบ",s:5,t:"ใส่ไปมหาลัยทุกวัน เพื่อนถามว่าต่อขนตามาเหรอ ชอบมาก",ph:1},
+ {u:"s***a",c:"#8f6bd8",v:"NEL003",o:"รวมแหนบ",s:4,t:"สวยตามรูป แต่ช่อตรงหัวตายาวไปนิดสำหรับตาชั้นเดียว ตัดสั้นลงได้",ph:0},
+ {u:"y***y",c:"#d65c7a",v:"NEL001",o:"ไม่รวมแหนบ",s:5,t:"มือใหม่มาก ดูคลิปร้านแล้วติดตามได้เลย ไม่ต้องใช้กาวเพิ่ม",ph:1},
+ {u:"o***e",c:"#5f8fd6",v:"NEL006",o:"รวมแหนบ",s:5,t:"ลุคเฉี่ยวแบบที่อยากได้ ใส่กับอายไลเนอร์ปีกแล้วปังมาก",ph:1},
+ {u:"r***k",c:"#c79a3a",v:"NEL004",o:"รวมแหนบ",s:5,t:"ช่อคละทำให้ดูฟูเป็นธรรมชาติกว่าที่คิด ใช้ซ้ำได้ 4 รอบ",ph:0},
+ {u:"l***a",c:"#3fa36b",v:"NEL002",o:"รวมแหนบ",s:4,t:"ส่งไวมาก สั่งเมื่อวานได้วันนี้ ขนนุ่มไม่แข็ง",ph:1},
+ {u:"c***p",c:"#b65ac9",v:"NEL005",o:"ไม่รวมแหนบ",s:5,t:"หนาฟูสมชื่อ Glam เหมาะกับงานกลางคืนจริง ๆ",ph:0},
+ {u:"d***w",c:"#e06b5f",v:"NEL003",o:"ไม่รวมแหนบ",s:5,t:"ตอนแรกลังเลระหว่าง 003 กับ 005 กดเปรียบเทียบแล้วเลือก 003 ถูกใจมาก",ph:1},
+ {u:"g***t",c:"#5a9ec9",v:"NEL001",o:"รวมแหนบ",s:5,t:"แพ็คมาดี กล่องไม่บุบ ช่อเรียงสวย",ph:0},
+ {u:"w***i",c:"#c0577a",v:"NEL001",o:"รวมแหนบ",s:4,t:"ช่อเล็กดูเป็นธรรมชาติ ถ้าอยากได้ตาโตแนะนำ 003 แทน",ph:1}
+];
+const CART0=[
+ {id:"c1",shop:"Lumi Lash Official",name:"กาวติดขนตา กันน้ำ ติดทน 24 ชม. 5 มล.",opt:"สีดำ",price:59,old:120,img:"glue",tag:"ลดราคา"},
+ {id:"c2",shop:"Mira Beauty",name:"ลิปทินท์เนื้อเจล ฉ่ำวาว ติดทน",opt:"Rose 03",price:129,old:259,img:"tint",tag:"ลดราคา"},
+ {id:"c3",shop:"Mira Beauty",name:"ลิปทินท์เนื้อเจล ฉ่ำวาว ติดทน",opt:"Coral 05",price:129,old:259,img:"tint2",tag:"",oos:1},
+ {id:"c4",shop:"Cotton Day",name:"เสื้อครอปผ้าร่อง แขนสั้น สีพื้น",opt:"ครีม, S",price:159,old:299,img:"top",tag:""},
+ {id:"c5",shop:"Cotton Day",name:"เสื้อครอปผ้าร่อง แขนสั้น สีพื้น",opt:"ดำ, M",price:159,old:299,img:"top2",tag:"",oos:1},
+ {id:"c6",shop:"Hair Studio",name:"กิ๊บติดผมมุก เซ็ต 6 ชิ้น สไตล์เกาหลี",opt:"มุกขาว",price:49,old:99,img:"clip",tag:"ลดราคา"},
+ {id:"c7",shop:"Lumi Lash Official",name:"แหนบติดขนตา ปลายโค้ง สแตนเลส",opt:"สีเงิน",price:39,old:79,img:"tweezer",tag:""}
+];
+const ADDR={n:"สมใจ ใจดี",ph:"(+66)08*****12",a:"99/9 ถนนตัวอย่าง แขวงตัวอย่าง เขตตัวอย่าง กรุงเทพฯ 10000"};
+
+/* ---------- state ---------- */
+const S={scr:"feed",stack:[],sheet:null,ptab:"ov",sel:null,opt:null,qty:1,from:"video",need:false,mode:"cart",
+ cmp:["NEL001","NEL003"],only:false,rf:"all",rph:false,chat:[],fd:{i:0,a:[]},tv:"NEL003",tcmp:false,
+ cart:CART0.map(x=>({...x,on:false})),hq:"",hcat:"all",gp:null,gopt:null,gq:1,gneed:false,dms:{},dmid:null,read:{},prtab:"v",cq:"",cf:"all",cpn:"auto",pay:"pp",order:null,otab:"recv",remind:true,recv:false,chk:{},stars:5,rtx:"",rr:null,zoom:null};
+const app=document.getElementById("app"),sheetEl=document.getElementById("sheet");
+
+/* ---------- image painting (all generated, no external images) ---------- */
+const IMG={},IMGC={};
+function rng(seed){let s=seed|0||1;return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646}}
+function cv(w,h){const c=document.createElement("canvas");c.width=w;c.height=h;return[c,c.getContext("2d")]}
+function strand(x,y,a,len,curl,w,g){g.beginPath();const seg=10;let px=x,py=y;
+  for(let i=1;i<=seg;i++){const t=i/seg,aa=a+curl*t*t*1.6;const nx=x+Math.sin(a)*len*t+Math.sin(aa)*len*.0,ny=y;
+    const cx2=x+len*(Math.sin(a)*t+ (Math.sin(aa)-Math.sin(a))*t*.35),cy2=y-len*(Math.cos(a)*t-(Math.cos(a)-Math.cos(aa))*t*.35);
+    g.lineWidth=Math.max(.25,w*(1-t*.85));g.beginPath();g.moveTo(px,py);g.lineTo(cx2,cy2);g.stroke();px=cx2;py=cy2}}
+function cluster(g,x,y,v,scale,r,dir,angBias,dm){dm=dm||1;const p=VAR[v].p;const n=Math.round(p.n*dm);
+  for(let i=0;i<n;i++){const t=n>1?i/(n-1):.5;const a=(angBias||0)+(t-.5)*2*p.sp/(dm>1?1.5:1)+(r()-.5)*(dm>1?.18:.08);
+    let L=scale*p.L*(.82+r()*.22);if(p.mix)L*=.85+r()*.35;
+    g.strokeStyle=`rgba(${18+r()*10|0},${12+r()*8|0},${14+r()*8|0},${.82+r()*.15})`;
+    strand(x+(t-.5)*scale*.12,y,a,L,(dir||1)*p.c*(.7+r()*.5)*(t<.5?-1:1)*.6+ (dir||1)*p.c*.4,p.w*scale*.012,g)}
+  g.fillStyle="rgba(15,10,12,.95)";g.beginPath();g.ellipse(x,y+1,scale*.085,scale*.018,0,0,Math.PI*2);g.fill()}
+function tray(v,W){const k="tray"+v+W;if(IMG[k])return IMG[k];const H=W;const[c,g]=cv(W,H);const r=rng(v.charCodeAt(5)*131+7);
+  let gr=g.createLinearGradient(0,0,W,H);gr.addColorStop(0,"#fbe1ea");gr.addColorStop(1,"#f2b6c9");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  // soft light
+  gr=g.createRadialGradient(W*.25,H*.15,10,W*.25,H*.15,W*.8);gr.addColorStop(0,"rgba(255,255,255,.55)");gr.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  // box
+  const bx=W*.08,by=H*.1,bw=W*.84,bh=H*.8;
+  g.save();g.shadowColor="rgba(120,40,70,.35)";g.shadowBlur=W*.05;g.shadowOffsetY=W*.02;
+  g.fillStyle="#fffafc";rr(g,bx,by,bw,bh,W*.03);g.fill();g.restore();
+  gr=g.createLinearGradient(0,by,0,by+bh*.16);gr.addColorStop(0,"#f48fb1");gr.addColorStop(1,"#ec6f98");g.fillStyle=gr;rr(g,bx,by,bw,bh*.16,W*.03,1);g.fill();
+  g.fillStyle="#fff";g.font=`700 ${W*.055}px "IBM Plex Sans Thai",sans-serif`;g.textBaseline="middle";g.fillText("LUMI LASH",bx+W*.04,by+bh*.08);
+  g.textAlign="right";g.font=`700 ${W*.06}px "IBM Plex Sans Thai",sans-serif`;g.fillText(v,bx+bw-W*.04,by+bh*.08);g.textAlign="left";
+  // trays
+  const rows=4,cols=v==="NEL005"?6:5,top=by+bh*.22,rowH=bh*.185;
+  for(let ro=0;ro<rows;ro++){const y0=top+ro*rowH;g.fillStyle="#f4eef1";rr(g,bx+W*.04,y0,bw-W*.08,rowH*.86,W*.012);g.fill();
+    g.strokeStyle="rgba(0,0,0,.06)";g.lineWidth=1;g.stroke();
+    for(let co=0;co<cols;co++){const x=bx+W*.04+(co+.5)*(bw-W*.08)/cols;let sc=rowH*1.05;
+      if(VAR[v].p.fox)sc*=.75+co/(cols-1)*.45;
+      cluster(g,x,y0+rowH*.8,v,sc,r,1,0,2.4)}}
+  g.fillStyle="#a8496f";g.font=`600 ${W*.038}px "IBM Plex Sans Thai",sans-serif`;g.fillText(`${VAR[v].st}  ${VAR[v].len.replace(" (ยาวที่หางตา)","")}`,bx+W*.04,by+bh*.96);
+  return IMG[k]=c.toDataURL("image/jpeg",.88)}
+function rr(g,x,y,w,h,r,topOnly){g.beginPath();g.moveTo(x+r,y);g.lineTo(x+w-r,y);g.quadraticCurveTo(x+w,y,x+w,y+r);
+  if(topOnly){g.lineTo(x+w,y+h);g.lineTo(x,y+h)}else{g.lineTo(x+w,y+h-r);g.quadraticCurveTo(x+w,y+h,x+w-r,y+h);g.lineTo(x+r,y+h);g.quadraticCurveTo(x,y+h,x,y+h-r)}
+  g.lineTo(x,y+r);g.quadraticCurveTo(x,y,x+r,y);g.closePath()}
+function bez(p0,p1,p2,p3,t){const u=1-t;return[u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]]}
+function eye(v,W,H,seed){const k="eye"+v+W+"x"+H+(seed||0);if(IMG[k])return IMG[k];const[c,g]=cv(W,H);const r=rng((seed||3)*977+(v?v.charCodeAt(5):1));
+  const tone=[[236,196,170],[226,182,154],[214,166,136]][(seed||0)%3];
+  let gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,`rgb(${tone[0]+6},${tone[1]+6},${tone[2]+6})`);gr.addColorStop(1,`rgb(${tone[0]-14},${tone[1]-16},${tone[2]-16})`);g.fillStyle=gr;g.fillRect(0,0,W,H);
+  // skin texture
+  for(let i=0;i<W*H/60;i++){g.fillStyle=`rgba(${r()<.5?255:120},${r()<.5?220:80},${r()<.5?200:70},${r()*.05})`;g.fillRect(r()*W,r()*H,1.5,1.5)}
+  const cx=W*.5,cy=H*.6,ew=Math.min(W*.66,H*1.5),eh=ew*.3;
+  const L=[cx-ew/2,cy+eh*.05],R=[cx+ew/2,cy-eh*.12];
+  const U=[L,[cx-ew*.28,cy-eh*1.05],[cx+ew*.22,cy-eh*1.12],R],D=[R,[cx+ew*.18,cy+eh*.62],[cx-ew*.25,cy+eh*.66],L];
+  // eyeshadow + crease
+  g.save();g.filter=`blur(${ew*.05}px)`;gr=g.createRadialGradient(cx,cy-eh*.9,eh*.2,cx,cy-eh*.6,ew*.55);gr.addColorStop(0,"rgba(190,110,105,.38)");gr.addColorStop(1,"rgba(190,110,105,0)");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.strokeStyle="rgba(110,60,50,.45)";g.lineWidth=eh*.12;g.beginPath();g.moveTo(L[0]+ew*.06,L[1]-eh*.45);g.bezierCurveTo(cx-ew*.25,cy-eh*1.65,cx+ew*.2,cy-eh*1.7,R[0]-ew*.02,R[1]-eh*.55);g.stroke();g.restore();
+  // brow
+  g.save();const by=cy-eh*2.25;for(let i=0;i<260;i++){const t=r();const bx=cx-ew*.55+t*ew*1.05;const yy=by-Math.sin(Math.min(1,t*1.4)*Math.PI*.55)*eh*.5+ (r()-.5)*eh*.22*(1-t*.5);
+    g.strokeStyle=`rgba(${50+r()*20|0},${32+r()*12|0},${26},${.5+r()*.4})`;g.lineWidth=ew*.004+r()*ew*.003;g.beginPath();g.moveTo(bx,yy);g.lineTo(bx+ew*.04,yy-eh*.06-r()*eh*.05+t*eh*.1);g.stroke()}g.restore();
+  // almond
+  const path=()=>{g.beginPath();g.moveTo(...L);g.bezierCurveTo(...U[1],...U[2],...U[3]);g.bezierCurveTo(...D[1],...D[2],...D[3]);g.closePath()};
+  g.save();path();g.clip();
+  gr=g.createRadialGradient(cx,cy,eh*.2,cx,cy,ew*.55);gr.addColorStop(0,"#fbf7f5");gr.addColorStop(1,"#cdbfba");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  const ix=cx+ew*.02,iy=cy-eh*.08,ir=eh*.72;
+  gr=g.createRadialGradient(ix,iy,ir*.2,ix,iy,ir);gr.addColorStop(0,"#8b5a34");gr.addColorStop(.55,"#5a3519");gr.addColorStop(1,"#22130b");g.fillStyle=gr;g.beginPath();g.arc(ix,iy,ir,0,7);g.fill();
+  for(let i=0;i<160;i++){const a=r()*Math.PI*2,r1=ir*(.36+r()*.1),r2=ir*(.75+r()*.22);g.strokeStyle=`rgba(${r()<.5?200:40},${r()<.5?150:25},${r()<.5?90:15},${.18+r()*.2})`;g.lineWidth=ir*.02;g.beginPath();g.moveTo(ix+Math.cos(a)*r1,iy+Math.sin(a)*r1);g.lineTo(ix+Math.cos(a)*r2,iy+Math.sin(a)*r2);g.stroke()}
+  g.strokeStyle="rgba(20,10,6,.8)";g.lineWidth=ir*.09;g.beginPath();g.arc(ix,iy,ir*.96,0,7);g.stroke();
+  g.fillStyle="#0b0605";g.beginPath();g.arc(ix,iy,ir*.36,0,7);g.fill();
+  g.fillStyle="rgba(255,255,255,.92)";g.beginPath();g.ellipse(ix-ir*.32,iy-ir*.36,ir*.14,ir*.1,-.5,0,7);g.fill();
+  g.fillStyle="rgba(255,255,255,.5)";g.beginPath();g.arc(ix+ir*.3,iy+ir*.3,ir*.05,0,7);g.fill();
+  gr=g.createLinearGradient(0,cy-eh,0,cy-eh*.1);gr.addColorStop(0,"rgba(50,25,20,.6)");gr.addColorStop(1,"rgba(50,25,20,0)");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.restore();
+  // waterline + lid line
+  g.strokeStyle="rgba(205,120,115,.7)";g.lineWidth=eh*.06;g.beginPath();g.moveTo(...R);g.bezierCurveTo(...D[1],...D[2],...D[3]);g.stroke();
+  g.strokeStyle="#1d1214";g.lineWidth=eh*(v?.09:.05);g.lineCap="round";g.beginPath();g.moveTo(...L);g.bezierCurveTo(...U[1],...U[2],...U[3]);g.stroke();
+  // lower lashes
+  for(let i=0;i<26;i++){const t=.15+i/26*.8;const[x,y]=bez(...D.slice().reverse(),t);g.strokeStyle="rgba(30,20,20,.55)";strand(x,y,Math.PI+(t-.5)*.8,eh*.18*(.6+r()*.6),0,eh*.02,g)}
+  // natural upper lashes
+  for(let i=0;i<55;i++){const t=.06+i/55*.94;const[x,y]=bez(...U,t);g.strokeStyle="rgba(28,18,18,.85)";strand(x,y,(t-.45)*1.2,eh*.42*(.6+r()*.5)*(0.6+Math.sin(t*Math.PI)*.5),.35,eh*.03,g)}
+  // false lashes
+  if(v){const p=VAR[v].p;const nC=p.n>14?16:13;for(let i=0;i<nC;i++){const t=.08+i/(nC-1)*.9;const[x,y]=bez(...U,t);let sc=eh*1.7*(.75+Math.sin(t*Math.PI)*.35);
+    if(p.fox)sc=eh*1.45*(.65+t*.75);cluster(g,x,y,v,sc,r,1,(t-.42)*1.25)}
+    g.strokeStyle="#140c0e";g.lineWidth=eh*.1;g.beginPath();const a=bez(...U,.08),b=bez(...U,.98);g.moveTo(...a);g.bezierCurveTo(...U[1],...U[2],...b);g.stroke()}
+  return IMG[k]=c.toDataURL("image/jpeg",.88)}
+function thing(kind,W){const k="th"+kind+W;if(IMG[k])return IMG[k];const[c,g]=cv(W,W);const bg={glue:"#f6e9ef",tint:"#fbe6e3",tint2:"#fde9de",top:"#efeae3",top2:"#e6e3ea",clip:"#ece8f2",tweezer:"#e7eef2",parcel:"#d9d2c8"}[kind]||"#eee";
+  g.fillStyle=bg;g.fillRect(0,0,W,W);let gr;const s=W/100;g.save();g.shadowColor="rgba(0,0,0,.2)";g.shadowBlur=6*s;g.shadowOffsetY=3*s;
+  if(kind==="glue"){g.fillStyle="#1d1a1f";rr(g,40*s,18*s,20*s,16*s,3*s);g.fill();gr=g.createLinearGradient(30*s,0,70*s,0);gr.addColorStop(0,"#f2f0f3");gr.addColorStop(.5,"#fff");gr.addColorStop(1,"#d9d4dc");g.fillStyle=gr;rr(g,32*s,32*s,36*s,52*s,6*s);g.fill();g.shadowColor="transparent";g.fillStyle="#ec6f98";g.fillRect(32*s,50*s,36*s,14*s);g.fillStyle="#fff";g.font=`700 ${6*s}px sans-serif`;g.fillText("LASH GLUE",36*s,59*s)}
+  if(kind==="tint"||kind==="tint2"){const col=kind==="tint"?"#c2304f":"#e8613f";gr=g.createLinearGradient(38*s,0,62*s,0);gr.addColorStop(0,col);gr.addColorStop(.5,"#ffffff88");gr.addColorStop(1,col);g.fillStyle=col;rr(g,38*s,40*s,24*s,46*s,5*s);g.fill();g.fillStyle=gr;g.globalAlpha=.35;rr(g,38*s,40*s,24*s,46*s,5*s);g.fill();g.globalAlpha=1;g.fillStyle="#2a2228";rr(g,40*s,12*s,20*s,30*s,4*s);g.fill()}
+  if(kind==="top"||kind==="top2"){g.fillStyle=kind==="top"?"#f3e7cf":"#2b282e";g.beginPath();g.moveTo(30*s,22*s);g.lineTo(42*s,18*s);g.quadraticCurveTo(50*s,26*s,58*s,18*s);g.lineTo(70*s,22*s);g.lineTo(86*s,38*s);g.lineTo(76*s,46*s);g.lineTo(70*s,40*s);g.lineTo(70*s,70*s);g.lineTo(30*s,70*s);g.lineTo(30*s,40*s);g.lineTo(24*s,46*s);g.lineTo(14*s,38*s);g.closePath();g.fill();g.shadowColor="transparent";g.strokeStyle="rgba(0,0,0,.08)";for(let i=0;i<14;i++){g.beginPath();g.moveTo((32+i*2.8)*s,30*s);g.lineTo((32+i*2.8)*s,70*s);g.stroke()}}
+  if(kind==="clip"){for(let i=0;i<3;i++){g.fillStyle="#d8c9a0";rr(g,(18+i*24)*s,30*s,18*s,46*s,3*s);g.fill();for(let j=0;j<4;j++){gr=g.createRadialGradient((25+i*24)*s,(36+j*11)*s,1,(27+i*24)*s,(38+j*11)*s,5*s);gr.addColorStop(0,"#fff");gr.addColorStop(1,"#d8d2cc");g.fillStyle=gr;g.beginPath();g.arc((27+i*24)*s,(38+j*11)*s,4.5*s,0,7);g.fill()}}}
+  if(kind==="tweezer"){gr=g.createLinearGradient(0,20*s,0,80*s);gr.addColorStop(0,"#eef1f4");gr.addColorStop(1,"#9aa3ad");g.strokeStyle=gr;g.lineWidth=5*s;g.lineCap="round";g.beginPath();g.moveTo(30*s,82*s);g.lineTo(46*s,22*s);g.quadraticCurveTo(50*s,16*s,54*s,22*s);g.lineTo(70*s,82*s);g.stroke()}
+  if(kind==="parcel"){g.restore();g.save();gr=g.createLinearGradient(0,0,0,W);gr.addColorStop(0,"#7a5a3f");gr.addColorStop(.62,"#5e4430");gr.addColorStop(.62,"#b9b2a8");gr.addColorStop(1,"#a39b90");g.fillStyle=gr;g.fillRect(0,0,W,W);g.strokeStyle="rgba(0,0,0,.18)";g.lineWidth=2*s;g.strokeRect(14*s,4*s,72*s,58*s);g.fillStyle="#d8b46a";g.beginPath();g.arc(78*s,36*s,2.6*s,0,7);g.fill();
+    g.shadowColor="rgba(0,0,0,.35)";g.shadowBlur=8*s;g.shadowOffsetY=4*s;g.fillStyle="#c89a62";g.fillRect(26*s,52*s,46*s,32*s);g.shadowColor="transparent";g.fillStyle="#b2864f";g.beginPath();g.moveTo(26*s,52*s);g.lineTo(34*s,46*s);g.lineTo(80*s,46*s);g.lineTo(72*s,52*s);g.fill();g.fillStyle="#d7ad78";g.beginPath();g.moveTo(72*s,52*s);g.lineTo(80*s,46*s);g.lineTo(80*s,78*s);g.lineTo(72*s,84*s);g.fill();
+    g.fillStyle="rgba(240,230,210,.8)";g.fillRect(45*s,52*s,8*s,32*s);g.fillStyle="#fff";g.fillRect(30*s,62*s,12*s,9*s);g.fillStyle="#333";for(let i=0;i<5;i++)g.fillRect((31+i*2)*s,64*s,1*s,5*s)}
+  g.restore();return IMG[k]=c.toDataURL("image/jpeg",.88)}
+function prodImg(kind,W){const k="pi"+kind+W;if(IMG[k])return IMG[k];const[c,g]=cv(W,W);const s=W/100;
+ const BG={serum:["#f3eee6","#e6dccb"],sun:["#e8f4fb","#cfe6f3"],cushion:["#f7e9ee","#ecd0da"],sneaker:["#eef0f3","#d9dde3"],buds:["#eceef6","#d6daea"],tumbler:["#e9f3ee","#cfe5d8"],case:["#f4ecf8","#e2d2ee"],tote:["#f4efe6","#e5dac6"],hoodie:["#eceae8","#d8d3cf"],snack:["#fff1dc","#ffd9a6"],mask:["#eaf5f4","#cde8e5"],lamp:["#2b2733","#151219"],skirt:["#f1ece6","#e0d6ca"],charger:["#eef1f4","#d7dde4"]}[kind]||["#eee","#ddd"];
+ let gr=g.createLinearGradient(0,0,0,W);gr.addColorStop(0,BG[0]);gr.addColorStop(1,BG[1]);g.fillStyle=gr;g.fillRect(0,0,W,W);
+ g.fillStyle="rgba(0,0,0,.08)";g.beginPath();g.ellipse(50*s,86*s,30*s,5*s,0,0,7);g.fill();
+ g.save();g.shadowColor="rgba(0,0,0,.18)";g.shadowBlur=6*s;g.shadowOffsetY=3*s;
+ const lg=(x0,x1,c1,c2)=>{const q=g.createLinearGradient(x0*s,0,x1*s,0);q.addColorStop(0,c1);q.addColorStop(.45,c2);q.addColorStop(1,c1);return q};
+ if(kind==="serum"){g.fillStyle=lg(36,64,"#b77a3c","#e9b878");rr(g,36*s,40*s,28*s,46*s,5*s);g.fill();g.fillStyle="#1d1a1f";rr(g,42*s,26*s,16*s,16*s,3*s);g.fill();g.fillStyle="#1d1a1f";g.beginPath();g.ellipse(50*s,22*s,9*s,7*s,0,0,7);g.fill();g.shadowColor="transparent";g.fillStyle="#fff8ee";g.fillRect(39*s,54*s,22*s,16*s);g.fillStyle="#6b4a2a";g.font=`700 ${4.5*s}px sans-serif`;g.textAlign="center";g.fillText("VIT C",50*s,61*s);g.font=`${3.4*s}px sans-serif`;g.fillText("SERUM 30ml",50*s,66*s)}
+ if(kind==="sun"){g.fillStyle=lg(32,68,"#f6f8fa","#ffffff");g.beginPath();g.moveTo(34*s,20*s);g.lineTo(66*s,20*s);g.lineTo(62*s,74*s);g.lineTo(38*s,74*s);g.closePath();g.fill();g.fillStyle="#f2a23a";rr(g,40*s,74*s,20*s,12*s,3*s);g.fill();g.shadowColor="transparent";g.fillStyle="#f2a23a";g.font=`700 ${6*s}px sans-serif`;g.textAlign="center";g.fillText("SPF50+",50*s,44*s);g.fillStyle="#3a7bb0";g.font=`${3.6*s}px sans-serif`;g.fillText("UV PROTECT",50*s,51*s)}
+ if(kind==="cushion"){g.fillStyle=lg(18,82,"#d9a3b4","#f5d6e0");g.beginPath();g.ellipse(50*s,58*s,32*s,22*s,0,0,7);g.fill();g.fillStyle="#f1c9d6";g.beginPath();g.ellipse(50*s,52*s,32*s,20*s,0,0,7);g.fill();g.shadowColor="transparent";g.strokeStyle="#c98aa0";g.lineWidth=1.2*s;g.stroke();g.fillStyle="#fff";g.font=`700 ${5*s}px sans-serif`;g.textAlign="center";g.fillText("GLOW",50*s,54*s)}
+ if(kind==="sneaker"){g.fillStyle="#fafafa";g.beginPath();g.moveTo(14*s,66*s);g.quadraticCurveTo(16*s,46*s,34*s,44*s);g.lineTo(52*s,36*s);g.quadraticCurveTo(60*s,46*s,74*s,52*s);g.quadraticCurveTo(88*s,56*s,88*s,66*s);g.closePath();g.fill();g.shadowColor="transparent";g.fillStyle="#e9e9ea";g.fillRect(14*s,66*s,74*s,7*s);g.strokeStyle="#c9c9cc";g.lineWidth=1*s;for(let i=0;i<4;i++){g.beginPath();g.moveTo((40+i*5)*s,(46-i*1.5)*s);g.lineTo((46+i*5)*s,(52-i*1.5)*s);g.stroke()}g.fillStyle="#ee5a3a";g.beginPath();g.moveTo(56*s,58*s);g.quadraticCurveTo(68*s,50*s,80*s,60*s);g.quadraticCurveTo(68*s,56*s,56*s,62*s);g.fill()}
+ if(kind==="buds"){g.fillStyle=lg(26,74,"#e9eaef","#ffffff");rr(g,28*s,40*s,44*s,38*s,16*s);g.fill();g.shadowColor="transparent";g.strokeStyle="#c9ccd6";g.lineWidth=1*s;g.beginPath();g.moveTo(28*s,54*s);g.lineTo(72*s,54*s);g.stroke();g.fillStyle="#fff";g.beginPath();g.ellipse(40*s,30*s,6*s,8*s,-.3,0,7);g.ellipse(60*s,30*s,6*s,8*s,.3,0,7);g.fill();g.fillStyle="#e1e3ea";g.fillRect(38*s,34*s,3*s,10*s);g.fillRect(59*s,34*s,3*s,10*s);g.fillStyle="#5ad17a";g.beginPath();g.arc(50*s,63*s,1.4*s,0,7);g.fill()}
+ if(kind==="tumbler"){g.fillStyle=lg(34,66,"#5a9a7a","#9fd4b8");rr(g,34*s,26*s,32*s,58*s,6*s);g.fill();g.fillStyle="#e8ece9";rr(g,32*s,18*s,36*s,10*s,3*s);g.fill();g.fillStyle="#d24f4f";g.fillRect(56*s,6*s,3*s,14*s);g.shadowColor="transparent";g.strokeStyle="#5a9a7a";g.lineWidth=4*s;g.beginPath();g.arc(70*s,48*s,9*s,-1.2,1.2);g.stroke()}
+ if(kind==="case"){g.fillStyle=lg(32,68,"#b48ad6","#e2c8f5");rr(g,32*s,14*s,36*s,72*s,8*s);g.fill();g.shadowColor="transparent";g.fillStyle="#2a2530";rr(g,36*s,18*s,16*s,18*s,5*s);g.fill();g.fillStyle="#555";g.beginPath();g.arc(41*s,23*s,3*s,0,7);g.arc(47*s,31*s,3*s,0,7);g.fill();g.fillStyle="#fff";g.font=`${10*s}px sans-serif`;g.textAlign="center";g.fillText("♡",56*s,64*s)}
+ if(kind==="tote"){g.strokeStyle="#c8b48e";g.lineWidth=3*s;g.beginPath();g.arc(50*s,34*s,12*s,Math.PI,0);g.stroke();g.fillStyle=lg(26,74,"#e8dcc2","#f6eedc");g.fillRect(26*s,34*s,48*s,50*s);g.shadowColor="transparent";g.fillStyle="#7d6a45";g.font=`700 ${6*s}px sans-serif`;g.textAlign="center";g.fillText("daily",50*s,62*s)}
+ if(kind==="hoodie"){g.fillStyle="#9aa6b8";g.beginPath();g.moveTo(30*s,26*s);g.quadraticCurveTo(50*s,10*s,70*s,26*s);g.lineTo(88*s,50*s);g.lineTo(78*s,58*s);g.lineTo(72*s,48*s);g.lineTo(72*s,84*s);g.lineTo(28*s,84*s);g.lineTo(28*s,48*s);g.lineTo(22*s,58*s);g.lineTo(12*s,50*s);g.closePath();g.fill();g.shadowColor="transparent";g.fillStyle="#7f8ba0";g.beginPath();g.ellipse(50*s,28*s,10*s,7*s,0,0,7);g.fill();g.fillRect(38*s,62*s,24*s,12*s)}
+ if(kind==="snack"){g.fillStyle=lg(28,72,"#e9572f","#ff8a4a");g.beginPath();g.moveTo(30*s,16*s);g.lineTo(70*s,16*s);g.lineTo(72*s,84*s);g.lineTo(28*s,84*s);g.closePath();g.fill();g.shadowColor="transparent";g.fillStyle="#ffd34a";g.beginPath();g.ellipse(50*s,52*s,14*s,10*s,0,0,7);g.fill();g.fillStyle="#fff";g.font=`700 ${6*s}px sans-serif`;g.textAlign="center";g.fillText("CRISPY",50*s,32*s)}
+ if(kind==="mask"){for(let i=0;i<3;i++){g.fillStyle=["#9fd8d1","#f6b8c8","#c7b6f0"][i];rr(g,(20+i*10)*s,(22+i*6)*s,44*s,56*s,4*s);g.fill()}g.shadowColor="transparent";g.fillStyle="#fff";g.font=`700 ${5*s}px sans-serif`;g.textAlign="center";g.fillText("SHEET MASK",62*s,62*s)}
+ if(kind==="lamp"){g.shadowColor="rgba(255,200,120,.8)";g.shadowBlur=20*s;g.fillStyle="#ffd58a";g.beginPath();g.moveTo(34*s,24*s);g.lineTo(66*s,24*s);g.lineTo(74*s,50*s);g.lineTo(26*s,50*s);g.closePath();g.fill();g.shadowColor="transparent";g.fillStyle="#c9b28a";g.fillRect(48*s,50*s,4*s,28*s);g.fillRect(36*s,78*s,28*s,5*s)}
+ if(kind==="skirt"){g.fillStyle="#3c3a46";g.fillRect(36*s,20*s,28*s,8*s);g.beginPath();g.moveTo(36*s,28*s);g.lineTo(64*s,28*s);g.lineTo(80*s,82*s);g.lineTo(20*s,82*s);g.closePath();g.fill();g.shadowColor="transparent";g.strokeStyle="rgba(255,255,255,.12)";g.lineWidth=1.5*s;for(let i=0;i<7;i++){g.beginPath();g.moveTo((38+i*4)*s,28*s);g.lineTo((22+i*9.5)*s,82*s);g.stroke()}}
+ if(kind==="charger"){g.fillStyle=lg(34,66,"#f1f2f4","#ffffff");rr(g,34*s,36*s,32*s,34*s,6*s);g.fill();g.fillStyle="#b9bec7";g.fillRect(42*s,24*s,4*s,12*s);g.fillRect(54*s,24*s,4*s,12*s);g.shadowColor="transparent";g.strokeStyle="#ddd";g.lineWidth=3*s;g.beginPath();g.moveTo(50*s,70*s);g.bezierCurveTo(50*s,92*s,82*s,70*s,84*s,90*s);g.stroke();g.fillStyle="#2f6fed";g.font=`700 ${5*s}px sans-serif`;g.textAlign="center";g.fillText("20W",50*s,56*s)}
+ g.restore();IMGC[k]=c;return IMG[k]=c.toDataURL("image/jpeg",.88)}
+function avatar(seed,W){const k="av"+seed+W;if(IMG[k])return IMG[k];const[c,g]=cv(W,W);const r=rng(seed*733+11);
+ const bgs=["#ffd9e2","#d9ecff","#e3f7e1","#fff0cc","#ece1ff","#ffe4d4"],hair=["#1c1414","#3b2418","#5a3a22","#1a1a24","#7a4b2a"],skin=["#f2cdb0","#e8b995","#d9a47c","#f7d8c0"];
+ g.fillStyle=bgs[seed%bgs.length];g.fillRect(0,0,W,W);const s=W/100,h=hair[seed%hair.length],sk=skin[(seed>>1)%skin.length],long=seed%3!==1;
+ g.fillStyle=h;if(long){rr(g,26*s,30*s,48*s,58*s,20*s);g.fill()}
+ g.fillStyle=sk;g.fillRect(44*s,58*s,12*s,14*s);g.fillStyle=["#ee6a8a","#5c7cfa","#40a070","#f0a020","#7b3fe4"][seed%5];g.beginPath();g.ellipse(50*s,100*s,36*s,26*s,0,0,7);g.fill();
+ g.fillStyle=sk;g.beginPath();g.ellipse(50*s,46*s,17*s,20*s,0,0,7);g.fill();
+ g.fillStyle=h;g.beginPath();g.ellipse(50*s,34*s,19*s,13*s,0,Math.PI,0);g.fill();g.beginPath();g.ellipse(long?42*s:46*s,33*s,14*s,7*s,-.3,0,7);g.fill();
+ g.fillStyle="#2a1c18";g.beginPath();g.arc(44*s,47*s,1.8*s,0,7);g.arc(56*s,47*s,1.8*s,0,7);g.fill();g.strokeStyle="#c0605a";g.lineWidth=1.4*s;g.beginPath();g.arc(50*s,53*s,4*s,.3,Math.PI-.3);g.stroke();
+ g.fillStyle="rgba(240,120,120,.25)";g.beginPath();g.arc(40*s,53*s,3.5*s,0,7);g.arc(60*s,53*s,3.5*s,0,7);g.fill();
+ return IMG[k]=c.toDataURL("image/jpeg",.9)}
+
+/* ---------- icons ---------- */
+const ic={
+ cartPlus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h2.2l2.3 10.5h10.3L19.6 7H9"/><circle cx="9" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/><path d="M14 8.5v4M12 10.5h4"/></svg>',
+ back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+ cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.3"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>',
+ share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l6 6-6 6M20 11H10a6 6 0 0 0-6 6v1"/></svg>',
+ more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+ search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>',
+ heart:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.6 1.3 5.2 3.1 1.6-1.8 3-3.1 5.2-3.1 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg>',
+ cmt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2.5 6.6 2.5 11c0 2.4 1.2 4.5 3.1 6l-.6 3.7 4.1-2.1c.9.2 1.9.4 2.9.4 5.5 0 9.5-3.6 9.5-8S17.5 3 12 3z"/></svg>',
+ save:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg>',
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>',
+ shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+ inbox:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+ user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>',
+ chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/></svg>',
+ store:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 9l1.5-5h13L20 9M4 9h16v11H4zM9 20v-6h6v6"/></svg>',
+ cmp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.5" width="7.4" height="15" rx="2"/><rect x="13.8" y="4.5" width="7.4" height="15" rx="2"/><path d="M5 9h3M5 12h3M16 9h3M16 12h3"/><path d="M10.6 15.5h2.8M12.4 14.3l1.2 1.2-1.2 1.2" stroke-width="1.6"/></svg>',
+ wand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20L15 9M14 4v3M19 9h-3M18 5l-2 2M10 4l.7 1.5M20 13l-1.5-.7"/></svg>',
+ eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ zoom:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6"/></svg>',
+ pay:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>',
+ box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>',
+ truck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6h12v10H2zM14 9h4l3 3v4h-7"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg>',
+ star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+ ret:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>',
+ phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z"/></svg>',
+ bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></svg>',
+ bagY:'<svg viewBox="0 0 24 24" width="14" height="14" fill="#fff"><path d="M6 8h12l-1 12H7zM9 8V6.5a3 3 0 0 1 6 0V8" stroke="#fff" stroke-width="2" fill="none"/></svg>'
+};
+const SB=(dark)=>`<div class="sb ${dark?"dark":""}"><span class="sbt">22:16</span><span class="sbi"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true"><path d="M8 2.3c2.4 0 4.6.9 6.3 2.5l1.2-1.3A10.8 10.8 0 0 0 8 .5C5.2.5 2.5 1.6.5 3.5l1.2 1.3A9 9 0 0 1 8 2.3z"/><path d="M8 5.6c1.5 0 2.9.6 3.9 1.5l1.2-1.3A7.4 7.4 0 0 0 8 3.8c-1.9 0-3.7.7-5.1 2l1.2 1.3c1-.9 2.4-1.5 3.9-1.5z"/><path d="M8 8.9c.7 0 1.3.2 1.7.6L8 11.5 6.3 9.5c.4-.4 1-.6 1.7-.6z"/></svg><svg width="27" height="13" viewBox="0 0 27 13" aria-hidden="true"><rect x=".5" y=".5" width="22.5" height="12" rx="3.6" fill="none" stroke="currentColor" opacity=".38"/><rect x="2" y="2" width="17" height="9" rx="2.2" fill="currentColor"/><path d="M24.4 4.4v4.2c.8-.3 1.4-1.1 1.4-2.1s-.6-1.8-1.4-2.1z" fill="currentColor" opacity=".45"/></svg></span></div>`;
+const topH=(t,right="")=>`${SB()}<div class="top"><button class="ib" data-a="back" aria-label="ย้อนกลับ">${ic.back}</button><h2>${t}</h2>${right||'<span class="sp"></span>'}</div>`;
+const nB='',nI='';
+const money=n=>"฿"+(Math.round(n*100)/100).toLocaleString(undefined,{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
+const cartCount=()=>S.cart.reduce((a,i)=>a+(i.q||1),0)+41;
+const unit=()=>VAR[S.sel].price+(S.opt==="tw"?TW:0);
+const optTxt=o=>o==="tw"?"รวมแหนบ":"ไม่รวมแหนบ";
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),1900)}
+
+/* ---------- screens ---------- */
+const SC={};
+SC.feed=()=>`<div class="feed"><img class="bgv" src="${eye("NEL001",780,1600,1)}" alt="คลิปรีวิวขนตา NEL001">
+  ${SB(1)}
+  <div class="ftabs"><button data-a="t" data-v="LIVE สด 12 ห้อง (ไม่ได้อยู่ในขอบเขตต้นแบบ)">LIVE</button><button data-a="t" data-v="ฟีดคนที่ติดตาม (ไม่ได้อยู่ในขอบเขตต้นแบบ)">Following</button><button class="on" data-a="t" data-v="คุณอยู่ที่หน้า For You แล้ว">For You</button><button data-a="go" data-v="shophome" aria-label="ค้นหา">${ic.search}</button></div>
+  <div class="vidtxt"><span class="big">NEL001</span>ยาว 8–10 มม. ลุคธรรมชาติ</div>
+  <div class="fside"><button data-a="t" data-v="ติดตาม Lumi Lash แล้ว"><span class="av">LL</span></button><button data-a="like"><span id="lk">${ic.heart}</span><span id="lkn">6,708</span></button><button data-a="t" data-v="ความคิดเห็น 54 รายการ (ไม่ได้อยู่ในขอบเขตต้นแบบ)">${ic.cmt}54</button><button data-a="t" data-v="บันทึกคลิปแล้ว">${ic.save}2,940</button><button data-a="t" data-v="คัดลอกลิงก์คลิปแล้ว">${ic.share}701</button></div>
+  <div class="fcap">
+    <button class="anchor" data-a="fromVideo"><span class="bagbig">${ic.bagY.replace('width="14" height="14"','width="22" height="22"')}</span><div style="flex:1;min-width:0"><b>Lumi Lash  ขนตาปลอมมีกาวในตัว NEL001</b><span>ส่งฟรี หมดเขตใน 24 ชั่วโมง</span></div></button>
+    <b>@lumilash.official</b><p>รีวิวขนตา NEL001 ติดเองง่ายมาก ลุคไปทำงาน ✨ #ขนตาปลอม #มือใหม่หัดติดขนตา</p></div>
+  <div class="prog"><i></i></div>
+  ${NAV("feed",1)}</div>`;
+const cartImg=it=>it.img==="lash"?tray(it.v,240):["glue","tint","tint2","top","top2","clip","tweezer","parcel"].includes(it.img)?thing(it.img,200):prodImg(it.img,200);
+const ic2={
+ coupon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M14 7v10" stroke-dasharray="2 2"/></svg>',
+ orders:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4M8.5 10h7M8.5 14h7M8.5 18h4"/></svg>',
+ msg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><circle cx="9" cy="10.5" r=".6" fill="currentColor"/><circle cx="12" cy="10.5" r=".6" fill="currentColor"/><circle cx="15" cy="10.5" r=".6" fill="currentColor"/></svg>',
+ later:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg>',
+ pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+ bolt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
+ live:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg>',
+ mall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/><path d="M12 11.5l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z" fill="currentColor" stroke="none"/></svg>',
+ ship:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M2 7h12v9H2zM14 10h4l3 3v3h-7"/><circle cx="6" cy="18" r="1.7"/><circle cx="17" cy="18" r="1.7"/></svg>',
+ people:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.5-5 6.5-5s5.7 1.5 6.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.5c2.6 0 4.6 1.4 5.5 4.5"/></svg>',
+ bellF:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a6 6 0 0 0-6 6v5l-2 3h16l-2-3V9a6 6 0 0 0-6-6zM10 19a2 2 0 0 0 4 0z"/></svg>',
+ menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+ grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></svg>',
+ lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+ play:'<svg viewBox="0 0 24 24" width="12" height="12" fill="#fff"><path d="M7 5v14l11-7z"/></svg>',
+ addUser:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="10" cy="8" r="3.5"/><path d="M3 20c.8-3.5 3.6-5 7-5s6.2 1.5 7 5M19 8v6M16 11h6"/></svg>'
+};
+function NAV(active,dark){const it=[["feed","Home",ic.home],["shophome","Shop",ic.shop],["create","",""],["inbox","Inbox",ic.inbox],["profile","Profile",ic.user]];
+ return `<nav class="nav ${dark?"":"light"}">${it.map(([k,l,i])=>k==="create"?`<button data-a="create" aria-label="สร้างคลิป"><span class="plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>`:`<button data-a="tab" data-v="${k}" style="${active===k?"font-weight:700;"+(dark?"":"color:var(--a-fg)"):"opacity:"+(dark?".75":".55")}">${k==="inbox"&&unread()?`<span class="dot" style="right:-6px">${unread()}</span>`:""}${i}${l}</button>`).join("")}</nav>`}
+const PRODS=[
+ {id:"p1",kw:"serum vitamin c skincare สกินแคร์ หน้าใส",name:"เซรั่มวิตามินซี ผิวกระจ่างใส ลดจุดด่างดำ 30 มล.",shop:"Glowly Official",price:189,old:390,sold:"24.1K",rate:4.8,img:"serum",cat:"beauty",opts:["30 มล.","50 มล. (+฿90)"],mall:1},
+ {id:"p2",kw:"sunscreen กันแดด spf skincare",name:"กันแดดเนื้อบางเบา SPF50+ PA++++ ไม่เหนียว",shop:"Sunny Lab",price:159,old:299,sold:"58.3K",rate:4.9,img:"sun",cat:"beauty",opts:["40 มล.","เซ็ตคู่ 2 หลอด (+฿140)"],mall:1},
+ {id:"p3",kw:"cushion รองพื้น makeup เครื่องสำอาง",name:"คุชชั่นผิวโกลว์ ปกปิดดี ติดทน 12 ชม.",shop:"Mira Beauty",price:249,old:590,sold:"11.7K",rate:4.7,img:"cushion",cat:"beauty",opts:["#21 ผิวขาว","#23 ผิวกลาง","#25 ผิวแทน"]},
+ {id:"p4",kw:"shoes sneaker รองเท้า",name:"รองเท้าผ้าใบสีขาว พื้นนุ่ม ใส่สบาย ใส่ได้ทุกวัน",shop:"StepUp Store",price:399,old:899,sold:"8,940",rate:4.6,img:"sneaker",cat:"fashion",opts:["36","37","38","39","40"]},
+ {id:"p5",kw:"earbuds หูฟัง bluetooth airpods",name:"หูฟังไร้สาย บลูทูธ 5.3 ตัดเสียงรบกวน แบตอึด 30 ชม.",shop:"GadgetHub TH",price:459,old:1290,sold:"32.5K",rate:4.7,img:"buds",cat:"tech",opts:["สีขาว","สีดำ"],mall:1},
+ {id:"p6",kw:"tumbler แก้ว",name:"แก้วเก็บความเย็น 900 มล. พร้อมหลอด เก็บเย็น 24 ชม.",shop:"Home Hug",price:199,old:450,sold:"41.2K",rate:4.8,img:"tumbler",cat:"home",opts:["เขียวเสจ","ครีม","ชมพู"]},
+ {id:"p7",kw:"case เคส iphone samsung มือถือ",name:"เคสโทรศัพท์ซิลิโคน กันกระแทก ลายหัวใจ",shop:"CaseMood",price:89,old:199,sold:"15.6K",rate:4.6,img:"case",cat:"tech",opts:["iPhone 15","iPhone 16","Galaxy S24"]},
+ {id:"p8",kw:"bag tote กระเป๋า",name:"กระเป๋าผ้าแคนวาส ใบใหญ่ ใส่โน้ตบุ๊กได้",shop:"Cotton Day",price:129,old:259,sold:"6,210",rate:4.7,img:"tote",cat:"fashion",opts:["ครีม","ดำ"]},
+ {id:"p9",kw:"hoodie เสื้อ ฮู้ด",name:"เสื้อฮู้ดโอเวอร์ไซซ์ ผ้าสำลีหนานุ่ม",shop:"Cotton Day",price:290,old:590,sold:"3,880",rate:4.8,img:"hoodie",cat:"fashion",opts:["M","L","XL"]},
+ {id:"p10",kw:"snack ขนม chips มันฝรั่ง",name:"มันฝรั่งทอดกรอบ รสบาร์บีคิว แพ็ค 6 ซอง",shop:"Snack Corner",price:99,old:150,sold:"72.0K",rate:4.9,img:"snack",cat:"food",opts:["บาร์บีคิว","ออริจินัล","สาหร่าย"]},
+ {id:"p11",kw:"mask มาส์ก skincare",name:"มาส์กชีทหน้าใส เซ็ต 10 แผ่น คละสูตร",shop:"Glowly Official",price:99,old:250,sold:"19.4K",rate:4.7,img:"mask",cat:"beauty",opts:["คละสูตร","สูตรชุ่มชื้น"]},
+ {id:"p12",kw:"lamp โคมไฟ",name:"โคมไฟตั้งโต๊ะ แสงวอร์ม ปรับความสว่างได้",shop:"Home Hug",price:259,old:520,sold:"2,940",rate:4.6,img:"lamp",cat:"home",opts:["สีครีม","สีไม้"]},
+ {id:"p13",kw:"skirt กระโปรง",name:"กระโปรงพลีทยาว เอวสูง ผ้าพริ้ว",shop:"Miko Closet",price:219,old:450,sold:"9,120",rate:4.5,img:"skirt",cat:"fashion",opts:["S","M","L"]},
+ {id:"p14",kw:"charger ชาร์จ usb",name:"หัวชาร์จเร็ว 20W USB-C พร้อมสาย 1 ม.",shop:"GadgetHub TH",price:149,old:390,sold:"27.8K",rate:4.8,img:"charger",cat:"tech",opts:["หัว+สาย","เฉพาะหัว (-฿30)"]}
+];
+const CATS=[["all","แนะนำ"],["beauty","ความงาม"],["fashion","แฟชั่น"],["tech","อิเล็กทรอนิกส์"],["home","ของใช้ในบ้าน"],["food","อาหาร"]];
+const LASHCARD={id:"lash",kw:"lash eyelash ขนตา ขนตาปลอม lumi nel makeup",name:"ขนตาปลอมมีกาวในตัว รุ่นกาวดำ 120–240 ช่อ (6 รุ่น)",shop:"Lumi Lash Official",price:99,old:258,sold:"78K",rate:4.8,cat:"beauty",lash:1};
+SC.shophome=()=>{const q=(S.hq||"").trim().toLowerCase();const toks=q.split(/\s+/).filter(Boolean);let list=[LASHCARD,...PRODS].filter(p=>(q||S.hcat==="all"||p.cat===S.hcat)&&(!q||toks.every(t=>(p.name+" "+p.shop+" "+(p.kw||"")).toLowerCase().includes(t))));
+ if(q)return shopSearch(q,list);
+ const tiles=[["คูปอง",ic2.coupon,"#16a394","coupons"],["คำสั่งซื้อ",ic2.orders,"#ee2f53","orders"],["ข้อความ",ic2.msg,"#4f6ef7","inbox"],["PayLater",ic2.later,"#1d1a24","later"],["ที่อยู่",ic2.pin,"#f08c00","addr"],["ส่งฟรี",ic2.ship,"#0ea5b7","coupons"],["LIVE",ic2.live,"#e8384f","live"],["Mall",ic2.mall,"#111","mall"],["Flash Sale",ic2.bolt,"#ff7a00","flash"],["ติดตาม",ic2.people,"#7b3fe4","follow"]];
+ return `${SB()}<div class="top"><div class="search" style="flex:1"><span style="width:18px;height:18px;display:grid">${ic.search}</span><input id="hq" value="${S.hq||""}" placeholder="ค้นหาสินค้า เช่น ขนตา กันแดด หูฟัง" aria-label="ค้นหาสินค้า" autocomplete="off"><button class="btn sm p" data-a="hsearch">ค้นหา</button></div><button class="ib" data-a="go" data-v="cart" aria-label="รถเข็น">${ic.cart}<span class="dot" id="cdot">${cartCount()}</span></button></div>
+ <div class="view" style="background:var(--a-soft)">
+  <div class="home-grid">${tiles.map(([t,i,c,a])=>`<button data-a="hTile" data-v="${a}"><i style="background:${c}">${i}</i>${t}</button>`).join("")}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px">
+   <button class="pi" data-a="openProd" data-v="NEL003" style="padding:8px"><b style="font-size:.85rem">Brands Crazy Deals</b><div style="display:flex;gap:4px;margin-top:6px"><img class="thumb" src="${tray("NEL003",140)}" style="width:50%" alt=""><img class="thumb" src="${prodImg("serum",140)}" style="width:50%" alt=""></div><div class="price" style="font-size:.8rem;margin-top:4px">ลดสูงสุด 60%</div></button>
+   <button class="pi" data-a="gprod" data-v="p5" style="padding:8px"><b style="font-size:.85rem;color:var(--red)">${ic2.bolt.replace("<svg",'<svg width="14" height="14" style="vertical-align:-2px"')} Flash Sale <span class="mut" style="font-weight:600">${S.fs||"13:52:02"}</span></b><div style="display:flex;gap:4px;margin-top:6px"><img class="thumb" src="${prodImg("buds",140)}" style="width:50%" alt=""><img class="thumb" src="${prodImg("tumbler",140)}" style="width:50%" alt=""></div><div class="price" style="font-size:.8rem;margin-top:4px">฿459  ฿199</div></button></div>
+  <div class="chips" style="padding:4px 8px 6px;background:var(--a-soft)">${CATS.map(([k,l])=>`<button class="chip ${S.hcat===k?"on":""}" data-a="hcat" data-v="${k}">${l}</button>`).join("")}</div>
+  <div class="pgrid" style="padding-top:0">${list.map(p=>p.lash?`<button class="pi" data-a="openProd" data-v="NEL003"><img src="${tray("NEL003",300)}" alt=""><div>${p.name}<br><span class="price">฿99 – ฿139</span> <span class="mut">★${p.rate}  ขายแล้ว ${p.sold}</span><br><span class="mut">${p.shop}</span></div></button>`
+   :`<button class="pi" data-a="gprod" data-v="${p.id}"><img src="${prodImg(p.img,300)}" alt=""><div>${p.mall?'<span style="background:#111;color:#fff;font-size:.6rem;border-radius:3px;padding:0 4px;margin-right:3px">Mall</span>':""}${p.name}<br><span class="price">฿${p.price}</span> <span class="strike">฿${p.old}</span><br><span class="mut">★${p.rate}  ขายแล้ว ${p.sold}</span><br><span class="mut">${p.shop}</span></div></button>`).join("")||'<p class="pad mut">ไม่พบสินค้าที่ค้นหา</p>'}</div></div>
+ ${NAV("shophome")}`};
+const PSPEC={
+ p1:{k:["ขนาด","ใช้ได้ประมาณ","ราคาต่อ 10 มล.","เนื้อเซรั่ม","เหมาะกับ"],v:[["30 มล.","1 เดือน","฿63","บางเบา ซึมไว","ลองครั้งแรก"],["50 มล.","1.5–2 เดือน","฿56","บางเบา ซึมไว","ใช้ประจำ คุ้มกว่า"]]},
+ p2:{k:["ปริมาณ","ใช้ได้ประมาณ","ราคาต่อหลอด","SPF","เหมาะกับ"],v:[["40 มล. x1","3–4 สัปดาห์","฿159","SPF50+ PA++++","ลองใช้"],["40 มล. x2","6–8 สัปดาห์","฿150","SPF50+ PA++++","ใช้ทุกวัน แบ่งพกพา"]]},
+ p3:{k:["เฉดสี","เหมาะกับผิว","อันเดอร์โทน","การปกปิด","ฟินิช"],v:[["#21 Light","ผิวขาว","ชมพู","ปานกลาง–สูง","โกลว์"],["#23 Natural","ผิวขาวเหลือง–กลาง","เหลือง","ปานกลาง–สูง","โกลว์"],["#25 Tan","ผิวสองสี–แทน","เหลือง/ส้ม","ปานกลาง–สูง","โกลว์"]],col:["#f3d6c6","#e6bf9e","#c99a72"],tone:1},
+ p4:{k:["ไซซ์ EU","ความยาวเท้า","เท้ากว้าง","คำแนะนำ"],v:[["36","22.5 ซม.","เผื่อได้ 0.5 ซม.","เท้าเล็ก"],["37","23.0 ซม.","เผื่อได้ 0.5 ซม.","ไซซ์ขายดี"],["38","23.5 ซม.","เผื่อได้ 0.5 ซม.","ไซซ์ขายดี"],["39","24.0 ซม.","เผื่อได้ 0.5 ซม.","เท้ากว้างเลือก +1"],["40","24.5 ซม.","เผื่อได้ 0.5 ซม.","เท้ากว้างเลือก +1"]],size:"foot"},
+ p5:{k:["สี","ผิวสัมผัส","ทนรอยนิ้วมือ","แบต","ตัดเสียงรบกวน"],v:[["ขาว","มันเงา","ปานกลาง","30 ชม.","มี (ANC)"],["ดำ","ด้าน","ดี","30 ชม.","มี (ANC)"]],col:[null,"#2a2a30"]},
+ p6:{k:["สี","ความจุ","เก็บเย็น","ผิวแก้ว"],v:[["เขียวเสจ","900 มล.","24 ชม.","พาวเดอร์โค้ท"],["ครีม","900 มล.","24 ชม.","พาวเดอร์โค้ท"],["ชมพู","900 มล.","24 ชม.","พาวเดอร์โค้ท"]],col:[null,"#efe3c8","#f3b6c6"]},
+ p7:{k:["รุ่นโทรศัพท์","ขนาดจอ","ช่องกล้อง","ปุ่มด้านข้าง"],v:[["iPhone 15","6.1 นิ้ว","2 เลนส์ แนวทแยง","มีปุ่ม Action"],["iPhone 16","6.1 นิ้ว","2 เลนส์ แนวตั้ง","มีปุ่มกล้อง"],["Galaxy S24","6.2 นิ้ว","3 เลนส์ แนวตั้ง","ปุ่มขวา"]]},
+ p8:{k:["สี","ขนาด","ใส่โน้ตบุ๊ก","เปื้อนง่าย"],v:[["ครีม","38 x 42 ซม.","ได้ถึง 14 นิ้ว","ปานกลาง"],["ดำ","38 x 42 ซม.","ได้ถึง 14 นิ้ว","น้อย"]],col:[null,"#2b2a2e"]},
+ p9:{k:["ไซซ์","รอบอก","ความยาวเสื้อ","ส่วนสูง/น้ำหนักที่เหมาะ"],v:[["M","112 ซม.","66 ซม.","155–165 ซม. / 45–55 กก."],["L","118 ซม.","69 ซม.","160–170 ซม. / 55–65 กก."],["XL","124 ซม.","72 ซม.","165–178 ซม. / 65–78 กก."]],size:"body"},
+ p10:{k:["รส","ความเผ็ด","เค็ม","พลังงาน/ซอง"],v:[["บาร์บีคิว","เผ็ดน้อย","ปานกลาง","160 kcal"],["ออริจินัล","ไม่เผ็ด","น้อย","150 kcal"],["สาหร่าย","ไม่เผ็ด","ปานกลาง","155 kcal"]],col:[null,"#f2c14a","#4f9a5c"]},
+ p11:{k:["สูตร","เหมาะกับผิว","กลิ่น","จำนวน"],v:[["คละ 5 สูตร","ทุกสภาพผิว","คละ","10 แผ่น"],["ชุ่มชื้น","ผิวแห้ง","ไม่มีกลิ่น","10 แผ่น"]]},
+ p12:{k:["สี","วัสดุฐาน","เข้ากับห้อง","แสง"],v:[["ครีม","เหล็กพ่นสี","มินิมอล ขาว","วอร์ม 3000K"],["สีไม้","ไม้ยางพารา","วินเทจ ไม้","วอร์ม 3000K"]],col:[null,"#b98a5a"]},
+ p13:{k:["ไซซ์","รอบเอว","รอบสะโพก","ความยาว"],v:[["S","24–26 นิ้ว","36 นิ้ว","32 นิ้ว"],["M","27–29 นิ้ว","39 นิ้ว","33 นิ้ว"],["L","30–32 นิ้ว","42 นิ้ว","34 นิ้ว"]],size:"waist"},
+ p14:{k:["ในกล่อง","สาย USB-C","ชาร์จเร็ว","เหมาะกับ"],v:[["หัว + สาย 1 ม.","มี","20W PD","ยังไม่มีสาย"],["หัวอย่างเดียว","ไม่มี","20W PD","มีสายอยู่แล้ว"]]}
+};
+const optPrice=(p,i)=>{const m=(p.opts[i]||"").match(/([+-])฿(\d+)/);return p.price+(m?(m[1]==="+"?1:-1)*+m[2]:0)};
+const optName=(p,i)=>p.opts[i].replace(/\s*\([+-]฿\d+\)/,"");
+const optRate=(p,i)=>(4.5+((parseInt(p.id.slice(1))*7+i*3)%5)/10).toFixed(1);
+const optRev=(p,i)=>((parseInt(p.id.slice(1))*131+i*577)%900+60);
+function gImg(p,i,W){const k="gv"+p.id+i+W;if(IMG[k])return IMG[k];const sp=PSPEC[p.id];const[c,g]=cv(W,W);prodImg(p.img,W);g.drawImage(IMGC["pi"+p.img+W],0,0,W,W);const col=sp&&sp.col&&sp.col[i];
+ if(col){g.save();g.globalCompositeOperation="color";g.globalAlpha=sp.tone?.55:.75;g.fillStyle=col;g.beginPath();g.ellipse(W*.5,W*.5,W*.36,W*.4,0,0,7);g.fill();g.restore()}
+ const lab=optName(p,i);g.font=`700 ${W*.085}px "IBM Plex Sans Thai",sans-serif`;const tw=g.measureText(lab).width;g.fillStyle="rgba(20,18,24,.78)";rr(g,W*.04,W*.83,tw+W*.08,W*.13,W*.03);g.fill();g.fillStyle="#fff";g.textBaseline="middle";g.fillText(lab,W*.08,W*.895);
+ return IMG[k]=c.toDataURL("image/jpeg",.88)}
+function gReviews(p){const n=p.opts.length;const names=["ป***น","ม***ย","ก***ต","จ***า","ท***ร","ฝ***น"];const tx=[["ตรงตามที่เทียบไว้เลย ","ดีกว่าที่คิด ","ส่งไว แพ็คดี "],["ใช้ทุกวันโอเคมาก","คุ้มราคา","ถ้าเลือกใหม่ก็เลือกตัวนี้"]];
+ const out=[];for(let i=0;i<Math.min(6,n*2);i++){const o=i%n;out.push({u:names[i],o,s:5-(i%3===2?1:0),t:tx[0][i%3]+optName(p,o)+" "+tx[1][(i+o)%3]})}return out}
+function pcard(p){return p.lash?`<button class="pi" data-a="openProd" data-v="NEL003"><img src="${tray("NEL003",300)}" alt=""><div>${p.name}<br><span class="price">฿99 – ฿139</span> <span class="mut">★${p.rate}  ขายแล้ว ${p.sold}</span><br><span class="mut">${p.shop}</span></div></button>`
+ :`<button class="pi" data-a="gprod" data-v="${p.id}"><img src="${prodImg(p.img,300)}" alt=""><div>${p.mall?'<span style="background:#111;color:#fff;font-size:.6rem;border-radius:3px;padding:0 4px;margin-right:3px">Mall</span>':""}${p.name}<br><span class="price">฿${p.price}</span> <span class="strike">฿${p.old}</span><br><span class="mut">★${p.rate}  ขายแล้ว ${p.sold}</span><br><span class="mut">${p.shop}</span></div></button>`}
+function shopSearch(q,list){return `${SB()}<div class="top"><button class="ib" data-a="hclear" aria-label="ย้อนกลับ">${ic.back}</button><div class="search" style="flex:1"><span style="width:18px;height:18px;display:grid">${ic.search}</span><input id="hq" value="${S.hq}" aria-label="ค้นหาสินค้า" autocomplete="off"><button class="ib" data-a="hclear" aria-label="ล้างคำค้น" style="width:24px;height:24px">${ic.x.replace("<svg",'<svg width="14" height="14"')}</button></div><button class="ib" data-a="go" data-v="cart" aria-label="รถเข็น">${ic.cart}<span class="dot" id="cdot">${cartCount()}</span></button></div>
+ <div class="view" style="background:var(--a-soft)"><div class="pad" style="padding-bottom:4px;font-size:.85rem"><b>ผลการค้นหา “${S.hq.trim()}”</b> <span class="mut">${list.length} รายการ</span></div>
+ ${list.length?`<div class="pgrid" style="padding-top:0">${list.map(pcard).join("")}</div>`:`<div class="pad" style="text-align:center;padding-top:40px"><div style="font-weight:600">ไม่พบสินค้าที่ค้นหา</div><div class="mut" style="margin-top:4px">ลองค้นด้วยคำอื่น เช่น ขนตา กันแดด หูฟัง รองเท้า</div><div class="chips" style="justify-content:center;flex-wrap:wrap;margin-top:12px">${["ขนตา","กันแดด","หูฟัง","รองเท้า","แก้ว"].map(k=>`<button class="chip" data-a="hkw" data-v="${k}">${k}</button>`).join("")}</div></div>`}</div>
+ ${NAV("shophome")}`}
+SC.gprod=()=>{const p=PRODS.find(x=>x.id===S.gp);const o=S.gopt;const sp=PSPEC[p.id];const many=p.opts.length>1;const rf=null;
+ const revs=gReviews(p).filter(r=>rf==null||r.o===rf);
+ return `${SB()}<div class="top"><button class="ib" data-a="back" aria-label="ย้อนกลับ">${ic.back}</button><h2 style="font-size:.9rem">${p.shop}</h2><button class="ib" data-a="t" data-v="คัดลอกลิงก์สินค้าแล้ว" aria-label="แชร์">${ic.share}</button><button class="ib" data-a="go" data-v="cart" aria-label="รถเข็น">${ic.cart}<span class="dot" id="cdot">${cartCount()}</span></button></div>
+ <div class="view" style="background:var(--a-soft)"><div class="gal"><img src="${o!=null?gImg(p,o,780):prodImg(p.img,780)}" alt=""><span class="cnt">${o!=null?o+1:1}/${p.opts.length}</span></div>
+ <div class="pbanner"><span class="pp">฿${o!=null?optPrice(p,o):p.price}</span><span class="strike" style="color:#ffe">฿${p.old}</span><span style="background:#fff;color:var(--red);font-weight:700;font-size:.72rem;border-radius:4px;padding:0 5px">-${Math.round((1-p.price/p.old)*100)}%</span></div>
+ <div class="sec"><div style="font-weight:600;line-height:1.4">${p.name}</div><div class="mut" style="margin-top:4px"><span class="stars">★</span> ${p.rate}  ขายแล้ว ${p.sold}  ส่งฟรีเมื่อซื้อครบ ฿59</div></div>
+ <div class="sec"><div class="between"><b style="font-size:.88rem">ตัวเลือก (${p.opts.length}) ${nI}</b><span class="mut">${o!=null?"เลือกแล้ว: "+optName(p,o):"ยังไม่ได้เลือก"}</span></div>
+  <div class="vgrid" style="margin-top:8px;grid-template-columns:repeat(${Math.min(3,p.opts.length)},1fr)">${p.opts.map((x,i)=>`<div class="vc ${o===i?"on":""}" data-a="gopt" data-v="${i}" role="button" tabindex="0"><img src="${gImg(p,i,240)}" alt="">${o===i?'<span class="ck">✓</span>':""}<b>${optName(p,i)}</b><span>${sp?sp.v[i][sp.k.length>3?3:1]:""}  ฿${optPrice(p,i)}</span></div>`).join("")}</div>
+  <div class="between" style="margin-top:12px"><b style="font-size:.85rem">จำนวน</b><span class="qty"><button data-a="gq" data-v="-1" aria-label="ลด">−</button><span>${S.gq}</span><button data-a="gq" data-v="1" aria-label="เพิ่ม">+</button></span></div>
+  ${S.gneed&&o==null?'<div class="alert">ยังไม่ได้เลือกตัวเลือก กรุณาเลือกก่อน</div>':""}</div>
+ ${o!=null&&sp?`<div class="sec"><b style="font-size:.88rem">สเปกของตัวเลือกที่เลือก: ${optName(p,o)}</b><table class="spec" style="margin-top:6px">${sp.k.map((k,j)=>`<tr><td>${k}</td><td>${sp.v[o][j]}</td></tr>`).join("")}</table></div>`:""}
+ <div class="sec" id="grev"><div class="between"><b style="font-size:.88rem">รีวิว</b><span class="mut">★${rf==null?p.rate:optRate(p,rf)}  ${rf==null?"ทุกตัวเลือก":optRev(p,rf)+" รีวิวของ "+optName(p,rf)}</span></div>
+  ${revs.map(r=>`<div class="rev"><div class="who"><img src="${avatar(r.u.charCodeAt(0)%9+1,60)}" style="width:26px;height:26px;border-radius:50%" alt="">${r.u} <span class="stars" style="font-size:.7rem">${"★".repeat(r.s)}</span></div><span class="vtag hl">ตัวเลือก: ${optName(p,r.o)}</span><p>${r.t}</p></div>`).join("")}</div>
+ <div class="sec"><div class="row"><img class="thumb" src="${avatar(parseInt(p.id.slice(1))+2,80)}" style="width:40px;height:40px;border-radius:50%" alt=""><div style="flex:1"><b style="font-size:.88rem">${p.shop}</b><div class="mut">คะแนนร้าน 4.${7+parseInt(p.id.slice(1))%3}  ตอบแชตภายใน ~1 ชม.</div></div><button class="btn sm o" data-a="t" data-v="ติดตาม ${p.shop} แล้ว">ติดตาม</button></div></div>
+ <div class="sec"><b style="font-size:.95rem">รายละเอียดสินค้า</b><p style="font-size:.84rem;margin:8px 0">${p.name} จากร้าน ${p.shop} มีให้เลือก ${p.opts.length} แบบ (${p.opts.map((x,i)=>optName(p,i)).join(", ")}) สินค้าพร้อมส่ง แพ็คภายใน 24 ชั่วโมง รับประกันสินค้าตรงปก คืนได้ภายใน 7 วันหากสินค้ามีปัญหา</p>
+ ${sp?`<table class="spec">${sp.k.map((k,j)=>`<tr><td>${k}</td><td>${[...new Set(sp.v.map(r=>r[j]))].join(" / ")}</td></tr>`).join("")}</table>`:""}</div></div>
+ <div class="bar"><button class="mini" data-a="t" data-v="หน้าร้าน ${p.shop}">${ic.store}ร้าน</button><button class="mini" data-a="dmShop" data-v="${p.shop}">${ic.chat}แชต</button>${many?`<button class="mini cmpb" data-a="gcmpOpen">${ic.cmp}เปรียบเทียบ</button>`:""}<button class="ycart" data-a="gadd" data-v="cart" aria-label="เพิ่มลงรถเข็น">${ic.cartPlus}</button><button class="btn p" data-a="gadd" data-v="buy">ซื้อเลย</button></div>`};
+SC.gcompare=()=>{const p=PRODS.find(x=>x.id===S.gp);const sp=PSPEC[p.id];const ids=S.gcmp.slice().sort((a,b)=>a-b);const cols=`grid-template-columns:repeat(${ids.length},minmax(0,1fr))`;
+ const keys=[...sp.k.map((k,j)=>[k,i=>sp.v[i][j]]),["ราคา",i=>"฿"+optPrice(p,i)],["รีวิวของตัวเลือกนี้",i=>`★${optRate(p,i)} (${optRev(p,i)})`]];
+ const same=keys.filter(([,f])=>new Set(ids.map(f)).size===1).length;
+ return `${topH(`เปรียบเทียบ ${ids.length} ตัวเลือก`)}
+ <div class="view">${p.opts.length>3?`<div class="pad" style="padding-bottom:4px"><div class="mut" style="margin-bottom:6px">เลือกได้ 2–3 ตัวเลือก (${ids.length}/3)</div><div class="chips">${p.opts.map((x,i)=>`<button class="chip ${S.gcmp.includes(i)?"on":""}" data-a="gcmpT" data-v="${i}">${optName(p,i)}</button>`).join("")}</div></div>`:""}
+ <div class="between" style="padding:8px 12px;background:var(--a-soft);font-size:.8rem"><span>แสดงเฉพาะจุดที่ต่างกัน ${same?`<span class="mut">(ซ่อนได้ ${same} แถว)</span>`:""}</span><button class="sw" role="switch" aria-checked="${!!S.gonly}" data-a="gonly" aria-label="แสดงเฉพาะจุดที่ต่างกัน"></button></div>
+ <div class="pad" style="padding-top:10px"><div class="cg" style="${cols}">${ids.map(i=>`<div class="ch ${S.gopt===i?"on":""}" data-a="gcSel" data-v="${i}" role="button" tabindex="0"><img src="${gImg(p,i,260)}" alt=""><b>${optName(p,i)}</b></div>`).join("")}</div>
+ <div class="mut" style="margin-top:6px;text-align:center">แถวสีเหลือง = จุดที่ต่างกัน  แตะการ์ดเพื่อเลือก</div>
+ ${keys.map(([k,f])=>{const vals=ids.map(f),d=new Set(vals).size>1;if(S.gonly&&!d)return"";return `<div class="crow ${d?"d":""}"><div class="k">${k}${d?"<em>ต่างกัน</em>":""}</div><div class="vv" style="${cols}">${vals.map((x,j)=>`<div class="${S.gopt===ids[j]?"sel":""}">${x}</div>`).join("")}</div></div>`}).join("")}
+ <div class="cg" style="${cols};margin-top:12px">${ids.map(i=>`<button class="btn sm ${S.gopt===i?"p":"o"}" style="flex:1" data-a="gcSel" data-v="${i}">${S.gopt===i?"✓ เลือกแล้ว":"เลือกตัวนี้"}</button>`).join("")}</div></div></div>
+ <div class="bar"><button class="btn p" data-a="gcDone" ${S.gopt!=null&&ids.includes(S.gopt)?"":"disabled"}>${S.gopt!=null&&ids.includes(S.gopt)?`ใช้ ${optName(p,S.gopt)} ต่อ`:"เลือกตัวเลือกก่อน"}</button></div>`};
+SC.gsize=()=>{const p=PRODS.find(x=>x.id===S.gp);const sp=PSPEC[p.id];const t=sp.size;
+ const Q={foot:["ความยาวเท้าของคุณ (วัดจากส้นถึงปลายนิ้ว)",["22.5 ซม.","23 ซม.","23.5 ซม.","24 ซม.","24.5 ซม."]],body:["ส่วนสูงและน้ำหนักของคุณ",["155–160 / 45–55 กก.","160–168 / 55–62 กก.","165–172 / 60–68 กก.","170–178 / 68–78 กก."]],waist:["รอบเอวของคุณ",["24–26 นิ้ว","27–29 นิ้ว","30–32 นิ้ว"]]}[t];
+ const map={foot:[0,1,2,3,4],body:[0,1,2,2],waist:[0,1,2]}[t];const pick=S.gsz;const rec=pick!=null?map[pick]:null;const loose=S.gfit==="loose"&&rec!=null&&rec<p.opts.length-1&&t!=="waist";const fin=rec!=null?(loose?rec+1:rec):null;
+ return `${topH("ช่วยเลือกไซซ์")}<div class="view"><div class="pad"><span class="bN">Product Finder</span><div class="q">${Q[0]}</div>
+ <div class="ans">${Q[1].map((x,i)=>`<button data-a="gsz" data-v="${i}" style="${pick===i?"border-color:var(--red);background:var(--red-soft)":""}"><b>${x}</b></button>`).join("")}</div>
+ ${t!=="waist"?`<div class="q" style="font-size:.95rem">ชอบใส่แบบไหน</div><div class="opt"><button class="${S.gfit!=="loose"?"on":""}" data-a="gfit" data-v="fit">พอดีตัว</button><button class="${S.gfit==="loose"?"on":""}" data-a="gfit" data-v="loose">หลวมสบาย / เท้ากว้าง</button></div>`:""}
+ ${fin!=null?`<div class="reco" style="margin-top:14px"><div class="row pad"><img class="thumb" src="${gImg(p,fin,160)}" style="width:72px;height:72px" alt=""><div><div class="mut">ไซซ์ที่แนะนำ</div><div style="font-size:1.3rem;font-weight:700">${optName(p,fin)}</div><div class="mut">${sp.v[fin].slice(1,3).join("  ")}</div></div></div></div>`:""}</div></div>
+ <div class="bar"><button class="btn s" data-a="back">ยกเลิก</button><button class="btn p" data-a="gszUse" data-v="${fin}" ${fin==null?"disabled":""}>เลือกไซซ์นี้</button></div>`};
+function sheetGConfirm(){const p=PRODS.find(x=>x.id===S.gp),o=S.gopt,sp=PSPEC[p.id];return `<div class="shade" data-a="closeSheet"><div class="sheet" data-stop="1">
+ <div class="sh"><div style="flex:1"><b>ตรวจสอบตัวเลือกก่อน${S.gmode==="buy"?"สั่งซื้อ":"เพิ่มลงรถเข็น"}</b> ${nB}<div class="mut">ป้องกันการเลือกผิดโดยไม่ตั้งใจ</div></div><button class="ib" data-a="closeSheet" aria-label="ปิด">${ic.x}</button></div>
+ <div class="sv"><div class="row" style="align-items:flex-start"><img class="thumb" src="${gImg(p,o,240)}" style="width:110px;height:110px" alt=""><div style="flex:1;min-width:0"><div style="font-size:.82rem;line-height:1.35">${p.name}</div><span class="vtag hl" style="margin-top:6px">${optName(p,o)}</span></div></div>
+ <table class="spec" style="margin-top:10px">${sp?sp.k.slice(0,3).map((k,j)=>`<tr><td>${k}</td><td><b>${sp.v[o][j]}</b></td></tr>`).join(""):""}<tr><td>จำนวน</td><td>${S.gq}</td></tr><tr><td>ราคารวม</td><td class="price">${money(optPrice(p,o)*S.gq)}</td></tr></table></div>
+ <div class="bar"><button class="btn s" data-a="closeSheet">แก้ไขตัวเลือก</button><button class="btn p" data-a="gConfirm">ถูกต้อง ${S.gmode==="buy"?"ไปชำระเงิน":"เพิ่มลงรถเข็น"}</button></div></div></div>`}
+/* inbox */
+const CONTACTS=[
+ {id:"lumi",n:"Lumi Lash Official",shop:1,av:3,last:()=>S.chat.length?S.chat[S.chat.length-1].t:"สวัสดีค่ะ ยินดีต้อนรับสู่ Lumi Lash 💕",time:"22:10"},
+ {id:"mind",n:"มายด์ 🌷",av:1,time:"21:48",seed:["ไปเซ็นทรัลพรุ่งนี้ป่ะ","คลิปขนตาที่แกส่งมาสวยมาก ซื้อรุ่นไหนอะ"]},
+ {id:"pond",n:"ปอนด์",av:2,time:"20:15",seed:["ส่งงานกลุ่มยังอะ","เดี๋ยวคืนนี้ทำสไลด์ต่อนะ"]},
+ {id:"nana",n:"นาน่า",av:4,time:"เมื่อวาน",seed:["ฮ่าาา ตลกมาก 😂"]},
+ {id:"cotton",n:"Cotton Day",shop:1,av:5,time:"จันทร์",seed:["ขอบคุณที่สั่งซื้อค่ะ พัสดุจัดส่งแล้วนะคะ"]},
+ {id:"fam",n:"แม่ ❤️",av:6,time:"อาทิตย์",seed:["กลับบ้านกี่โมงลูก"]}];
+const unread=()=>CONTACTS.filter(c=>!c.shop&&!(S.read||{})[c.id]&&c.id!=="nana").length;
+SC.inbox=()=>`${SB()}<div class="top"><button class="ib" data-a="t" data-v="เพิ่มเพื่อนจากรายชื่อติดต่อ" aria-label="เพิ่มเพื่อน">${ic2.addUser}</button><h2>Inbox</h2><button class="ib" data-a="t" data-v="ค้นหาแชต" aria-label="ค้นหา">${ic.search}</button></div>
+ <div class="view">
+  <div style="display:flex;gap:14px;padding:12px 14px;overflow-x:auto">${CONTACTS.filter(c=>!c.shop).map(c=>`<button data-a="dm" data-v="${c.id}" style="border:0;background:none;cursor:pointer;display:grid;justify-items:center;gap:3px;font-size:.7rem;flex:none"><img src="${avatar(c.av,120)}" style="width:54px;height:54px;border-radius:50%" alt="">${c.n.split(" ")[0]}</button>`).join("")}</div>
+  ${[["ผู้ติดตามใหม่","ปอนด์ และอีก 3 คนเริ่มติดตามคุณ",ic2.people,"#4f6ef7","followers"],["กิจกรรม","มายด์ ถูกใจคลิปของคุณ",ic2.bellF,"#ee2f53","activity"],["อัปเดตคำสั่งซื้อ",S.order?(S.recv?"พัสดุส่งถึงแล้ว เขียนรีวิวรับโบนัส":"พัสดุกำลังนำส่ง ถึงวันนี้ 10:00–12:00"):"คูปองส่งฟรีของคุณใกล้หมดอายุ",ic2.ship,"#16a394","orders"]].map(([t,d,i,c,a])=>`<button class="pm" style="padding:10px 14px" data-a="inboxSys" data-v="${a}"><span style="width:46px;height:46px;border-radius:50%;background:${c};color:#fff;display:grid;place-items:center;flex:none">${i.replace("<svg",'<svg width="22" height="22"')}</span><div style="flex:1;min-width:0"><b style="font-size:.88rem">${t}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d}</div></div><span class="dot" style="position:static">1</span></button>`).join("")}
+  <div class="mut" style="padding:10px 14px 2px;font-weight:600">ข้อความ</div>
+  ${CONTACTS.map(c=>{const th=S.dms[c.id]||[];const last=c.id==="lumi"?c.last():th.length?th[th.length-1].t:c.seed[c.seed.length-1];const un=!c.shop&&!(S.read||{})[c.id]&&c.id!=="nana";
+   return `<button class="pm" style="padding:10px 14px" data-a="dm" data-v="${c.id}"><img src="${avatar(c.av,100)}" style="width:50px;height:50px;border-radius:50%;flex:none" alt=""><div style="flex:1;min-width:0"><b style="font-size:.88rem">${c.n}</b>${c.shop?' <span class="vtag" style="font-size:.6rem;padding:0 5px;margin:0">ร้านค้า</span>':""}<div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${un?"color:var(--a-fg);font-weight:600":""}">${last}</div></div><div style="display:grid;justify-items:end;gap:4px"><span class="mut" style="font-size:.7rem">${c.time}</span>${un?'<span style="width:9px;height:9px;border-radius:50%;background:var(--red)"></span>':""}</div></button>`}).join("")}
+ </div>${NAV("inbox")}`;
+SC.dm=()=>{const c=CONTACTS.find(x=>x.id===S.dmid);const th=S.dms[c.id]||[];
+ return `${SB()}<div class="top"><button class="ib" data-a="back" aria-label="ย้อนกลับ">${ic.back}</button><img src="${avatar(c.av,80)}" style="width:32px;height:32px;border-radius:50%" alt=""><h2 style="text-align:left;font-size:.92rem">${c.n}<div class="mut" style="font-weight:400;font-size:.7rem">${c.shop?"ร้านค้า":"ใช้งานล่าสุด 5 นาทีที่แล้ว"}</div></h2><button class="ib" data-a="t" data-v="ตั้งค่าแชต" aria-label="ตั้งค่า">${ic.more}</button></div>
+ <div class="view chatv" id="chatv">${c.seed.map(t=>`<div class="msg them">${t}</div>`).join("")}${th.map(m=>`<div class="msg ${m.me?"me":"them"}">${m.t}</div>`).join("")}</div>
+ <div style="flex:none;padding:8px 10px 0;background:#fff"><div class="chips">${(c.shop?["สินค้ายังมีไหม","ส่งกี่วัน","ขอบคุณค่ะ"]:["555 ได้เลย","เดี๋ยวโทรหานะ","ส่งลิงก์ให้แล้ว"]).map(q=>`<button class="chip" data-a="dmq" data-v="${q}">${q}</button>`).join("")}<button class="chip" data-a="dmShare">ส่งลิงก์ขนตา NEL003</button></div></div>
+ <div class="bar"><input class="cin" id="dmin" placeholder="ส่งข้อความ…" aria-label="พิมพ์ข้อความ"><button class="btn sm p" data-a="dmSend">ส่ง</button></div>`};
+/* profile */
+const CLIPS=[["eye","NEL003",1,"12.4K"],["tray","NEL001",0,"3,210"],["pi","serum",0,"8,902"],["eye","NEL006",2,"45.1K"],["pi","tumbler",0,"1,044"],["eye","NEL001",0,"6,530"],["pi","sneaker",0,"2,288"],["tray","NEL005",0,"990"],["pi","cushion",0,"17.2K"]];
+SC.profile=()=>{const tab=S.prtab||"v";const clipImg=([k,a,b])=>k==="eye"?eye(a,240,320,b):k==="tray"?tray(a,240):prodImg(a,240);
+ return `${SB()}<div class="top"><button class="ib" data-a="t" data-v="เพิ่มเพื่อน" aria-label="เพิ่มเพื่อน">${ic2.addUser}</button><h2>สมใจ ใจดี ▾</h2><button class="ib" data-a="t" data-v="เมนูการตั้งค่าและความเป็นส่วนตัว" aria-label="เมนู">${ic2.menu}</button></div>
+ <div class="view"><div style="text-align:center;padding:14px 14px 6px"><img src="${avatar(7,200)}" style="width:92px;height:92px;border-radius:50%" alt="รูปโปรไฟล์"><div style="font-weight:600;margin-top:6px">@somjai.jaidee</div>
+  <div style="display:flex;justify-content:center;gap:26px;margin-top:10px">${[["128","กำลังติดตาม"],[S.followers||"2,431","ผู้ติดตาม"],["18.6K","ถูกใจ"]].map(([n,l])=>`<button data-a="t" data-v="${l}: ${n}" style="border:0;background:none;cursor:pointer;display:grid"><b style="font-size:1.05rem">${n}</b><span class="mut">${l}</span></button>`).join("")}</div>
+  <div style="display:flex;gap:6px;justify-content:center;margin-top:12px"><button class="btn s sm" data-a="t" data-v="แก้ไขโปรไฟล์">แก้ไขโปรไฟล์</button><button class="btn s sm" data-a="t" data-v="คัดลอกลิงก์โปรไฟล์แล้ว">แชร์โปรไฟล์</button><button class="btn s sm" data-a="go" data-v="orders" aria-label="คำสั่งซื้อ">${ic2.orders.replace("<svg",'<svg width="16" height="16" style="vertical-align:-3px"')} คำสั่งซื้อ</button></div>
+  <p style="font-size:.82rem;margin:10px 0 0">สายบิวตี้ 💄 รีวิวขนตา สกินแคร์ ของใช้น่ารัก ✨</p></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--a-line)">${[["v",ic2.grid,"คลิป"],["p",ic2.lock,"ส่วนตัว"],["l",ic.heart,"ถูกใจ"]].map(([k,i,l])=>`<button data-a="prtab" data-v="${k}" aria-label="${l}" style="border:0;background:none;cursor:pointer;padding:10px 0;display:grid;place-items:center;${tab===k?"box-shadow:inset 0 -2px 0 var(--a-fg)":"opacity:.45"}">${i.replace("<svg",'<svg width="22" height="22"')}</button>`).join("")}</div>
+  ${tab==="p"?`<p class="pad mut" style="text-align:center">คลิปส่วนตัวของคุณจะแสดงที่นี่ (ยังไม่มี)</p>`:`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">${(tab==="l"?CLIPS.slice().reverse():CLIPS).map((c,i)=>`<button data-a="${i===0&&tab==="v"?"tab":"t"}" data-v="${i===0&&tab==="v"?"feed":"เล่นคลิป ("+c[3]+" วิว)"}" style="border:0;padding:0;cursor:pointer;position:relative;aspect-ratio:3/4;overflow:hidden;background:#000"><img src="${clipImg(c)}" style="width:100%;height:100%;object-fit:cover;display:block" alt=""><span style="position:absolute;left:5px;bottom:4px;color:#fff;font-size:.7rem;font-weight:600;text-shadow:0 1px 2px #000;display:flex;align-items:center;gap:2px">${ic2.play}${c[3]}</span></button>`).join("")}</div>`}
+ </div>${NAV("profile")}`};
+SC.product=()=>{const v=S.sel||"NEL001";const t=S.ptab;
+ return `${SB()}<div class="top"><button class="ib" data-a="back" aria-label="ย้อนกลับ">${ic.back}</button><div class="search" style="flex:1;padding:5px 10px"><span style="width:16px;height:16px;display:grid">${ic.search}</span><input value="ขนตา lumi lash" aria-label="ค้นหา" id="ps"></div><button class="ib" data-a="t" data-v="คัดลอกลิงก์สินค้าแล้ว" aria-label="แชร์">${ic.share}</button><button class="ib" data-a="go" data-v="cart" aria-label="รถเข็น">${ic.cart}<span class="dot" id="cdot">${cartCount()}</span></button></div>
+ <div class="view" style="background:var(--a-soft)">
+ <div class="ptabs">${[["ov","ภาพรวม"],["rv","รีวิว"],["ds","รายละเอียด"]].map(([k,l])=>`<button class="${t===k?"on":""}" data-a="ptab" data-v="${k}">${l}</button>`).join("")}</div>
+ ${t==="ov"?`<div class="gal"><img src="${tray(v,780)}" alt="ภาพสินค้า ${v}"><span class="cnt">${IDS.indexOf(v)+1}/6</span>${S.sel&&S.from==="video"?`<span class="fromv bI">รุ่นเดียวกับในคลิป: ${v}</span>`:""}</div>
+ <div class="pbanner"><span class="pp">${money(VAR[v].price)}</span><span class="strike" style="color:#ffe">฿${ORIG}</span><span style="background:#fff;color:var(--red);font-weight:700;font-size:.72rem;border-radius:4px;padding:0 5px">-${Math.round((1-VAR[v].price/ORIG)*100)}%</span><span style="margin-left:auto;font-size:.75rem">Flash sale 01:43:06</span></div>
+ <div class="sec"><div style="font-weight:600;line-height:1.4">ขนตาปลอมมีกาวในตัว รุ่นกาวดำ 1 กล่อง 120–240 ช่อ ติดเองได้ ไม่ต้องใช้กาวเพิ่ม (6 รุ่น)</div>
+  <div class="mut" style="margin-top:4px"><span class="stars">★</span> 4.8 (6.6K)  ขายแล้ว 78K  ส่งฟรีเมื่อซื้อครบ ฿59</div></div>
+ <div class="sec"><div class="between"><b style="font-size:.88rem">ตัวเลือก: 6 รุ่น  2 แบบ</b><button class="btn sm s" data-a="openV" data-v="cart">เลือก ›</button></div>
+  <div class="vstrip">${IDS.map(id=>`<button data-a="pickStrip" data-v="${id}" style="${S.sel===id?"border-color:var(--red)":""}"><img src="${tray(id,160)}" alt=""><b>${id}</b><br>${VAR[id].st}</button>`).join("")}</div>
+</div>
+ <div class="sec"><div class="between"><b style="font-size:.88rem">รีวิวจากผู้ซื้อ (6.6K)</b><button class="btn sm s" data-a="ptab" data-v="rv">ดูทั้งหมด ›</button></div>${REVIEWS.slice(0,3).map(revCard).join("")}<button class="btn s" style="width:100%;margin-top:8px" data-a="ptab" data-v="rv">ดูรีวิวทั้งหมด 6.6K รายการ</button></div>
+ <div class="sec"><div class="between"><div class="row"><span class="rev"><span class="av" style="background:#ec6f98;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700">LL</span></span><div><b style="font-size:.88rem">Lumi Lash Official</b><div class="mut">ตอบแชตภายใน ~5 นาที  คะแนนร้าน 4.9</div></div></div><button class="btn sm o" data-a="t" data-v="ติดตามร้านแล้ว">ติดตาม</button></div></div>
+ <div class="sec"><b style="font-size:.95rem">รายละเอียดสินค้า</b>
+  <p style="font-size:.84rem;margin:8px 0">ขนตาปลอมแบบช่อมีกาวในตัว (กาวดำ) ไม่ต้องใช้กาวเพิ่ม ติดเองได้ภายใน 10 นาที ขนสังเคราะห์ PBT นุ่ม เบา ไม่ระคายเคือง ใช้ซ้ำได้ 3–5 ครั้ง มีให้เลือก 6 สไตล์ ตั้งแต่ลุคธรรมชาติจนถึงลุคปาร์ตี้ และเลือกได้ทั้งแบบรวมแหนบหรือไม่รวมแหนบ</p>
+  <table class="spec"><tr><td>แบรนด์</td><td>Lumi Lash</td></tr><tr><td>ประเภท</td><td>ขนตาปลอมแบบช่อ มีกาวในตัว</td></tr><tr><td>จำนวน</td><td>120–240 ช่อ ต่อกล่อง (ขึ้นอยู่กับรุ่น)</td></tr><tr><td>ความยาว</td><td>8–15 มม.</td></tr><tr><td>วัสดุ</td><td>ขนสังเคราะห์ PBT</td></tr><tr><td>ติดทน</td><td>8–12 ชั่วโมง</td></tr><tr><td>ผลิตที่</td><td>ประเทศจีน</td></tr></table>
+  <b style="font-size:.85rem;display:block;margin-top:12px">วิธีใช้</b>
+  <ol style="font-size:.82rem;margin:6px 0 0;padding-left:20px"><li>ทำความสะอาดขนตาและเปลือกตาให้แห้ง</li><li>ใช้แหนบคีบช่อขนตาออกจากถาด</li><li>ติดใต้ขนตาจริง ห่างจากโคนขนตาประมาณ 1 มม.</li><li>กดเบา ๆ ค้างไว้ 5 วินาที ทำซ้ำจนครบ</li><li>ถอดออกโดยใช้คลีนซิ่งออยล์เช็ดเบา ๆ</li></ol>
+  <b style="font-size:.85rem;display:block;margin-top:12px">ในกล่องมี</b>
+  <p style="font-size:.82rem;margin:4px 0 0">ขนตาปลอม 1 กล่อง  แหนบติดขนตา 1 ชิ้น (เฉพาะแบบรวมแหนบ)  คู่มือการใช้</p>
+  <img src="${eye(v,700,420,2)}" alt="ภาพตัวอย่างเมื่อติดจริง" style="width:100%;border-radius:10px;display:block;margin-top:12px"><div class="mut" style="margin-top:4px">ตัวอย่างเมื่อติดจริง รุ่น ${v}</div></div>`
+ :t==="rv"?reviewsTab():descTab()}
+ </div>
+ <div class="bar"><button class="mini" data-a="t" data-v="หน้าร้าน Lumi Lash (ไม่ได้อยู่ในขอบเขตต้นแบบ)">${ic.store}ร้าน</button><button class="mini" data-a="go" data-v="chat">${ic.chat}แชต</button><button class="mini cmpb" data-a="go" data-v="cpick">${ic.cmp}เปรียบเทียบ</button><button class="ycart" data-a="openV" data-v="cart" aria-label="เพิ่มลงรถเข็น">${ic.cartPlus}</button><button class="btn p" data-a="openV" data-v="buy">ซื้อเลย<span class="sub">ส่งฟรี</span></button></div>`};
+function revCard(r){return `<div class="rev"><div class="who"><span class="av" style="background:${r.c}">${r.u[0].toUpperCase()}</span>${r.u} <span class="stars" style="font-size:.7rem">${"★".repeat(r.s)}</span></div>
+ <span class="vtag hl">รุ่น: ${r.v}  ${r.o}</span><p>${r.t}</p>${r.ph?`<div class="ph"><img class="thumb" src="${eye(r.v,200,200,(REVIEWS.indexOf(r)%3))}" alt="รูปรีวิว ${r.v} บนตาจริง"><img class="thumb" src="${tray(r.v,200)}" alt=""></div>`:""}</div>`}
+function reviewsTab(){const f="all";let list=REVIEWS.filter(r=>(f==="all"||r.v===f)&&(!S.rph||r.ph));
+ const tot=f==="all"?6600:VAR[f].rc;const rate=f==="all"?4.8:VAR[f].rate;const dist=f==="all"?[78,14,5,2,1]:[[72,18,6,3,1],[70,20,6,2,2]][IDS.indexOf(f)%2];
+ return `<div class="sec"><div class="row" style="align-items:flex-start;gap:14px"><div style="text-align:center"><div style="font-size:2rem;font-weight:700;line-height:1">${rate}</div><div class="stars">★★★★★</div><div class="mut">${tot.toLocaleString()} รีวิว</div></div>
+  <div style="flex:1;display:grid;gap:3px">${dist.map((d,i)=>`<div class="rbar"><span>${5-i} ดาว</span><span class="tr"><i style="width:${d}%"></i></span><span class="mut">${d}%</span></div>`).join("")}</div></div>
+  <div class="chips" style="margin-top:10px"><button class="chip ${S.rph?"on":""}" data-a="rph">มีรูป</button><button class="chip" data-a="t" data-v="เรียงรีวิวล่าสุดแล้ว">ล่าสุด</button></div>
+  <div class="ai"><b>ผู้ซื้อพูดถึง</b>  กาวติดแน่นทั้งวัน  ทรงสวยเป็นธรรมชาติ  ติดง่าย</div></div>
+  <div class="sec">${list.length?list.map(revCard).join(""):`<p class="mut">ยังไม่มีรีวิวที่มีรูปของรุ่นนี้</p>`}</div>`}
+function descTab(){const v=S.sel||"NEL001";return `<div class="sec"><div class="lbl" style="margin-top:0">ข้อมูลสินค้าตามมาตรฐานหมวดขนตา ${nI}</div>
+ <div class="chips" style="margin-bottom:8px">${IDS.map(id=>`<button class="chip ${v===id?"on":""}" data-a="pickStrip" data-v="${id}">${id}</button>`).join("")}</div>
+ <table class="spec"><tr><td>รุ่น</td><td>${v}  ${VAR[v].st} (${VAR[v].th})</td></tr><tr><td>ความยาว</td><td>${VAR[v].len}</td></tr><tr><td>ความงอน</td><td>${VAR[v].curl}</td></tr><tr><td>ความหนา</td><td>${VAR[v].thick}</td></tr><tr><td>จำนวน</td><td>${VAR[v].cnt} ต่อกล่อง</td></tr><tr><td>กาว</td><td>มีกาวในตัว (กาวดำ) ติดทน 8–12 ชม.</td></tr><tr><td>ใช้ซ้ำ</td><td>3–5 ครั้ง</td></tr><tr><td>แหนบ</td><td>เลือกได้: รวมแหนบ (+฿20) หรือไม่รวม</td></tr><tr><td>อย. / วัสดุ</td><td>ขนสังเคราะห์ PBT  ไม่ระคายเคือง</td></tr></table>
+ <img src="${eye(v,600,400,2)}" alt="ภาพตัวอย่างบนตา" style="width:100%;border-radius:10px;margin-top:10px;display:block"><div class="mut" style="margin-top:4px">ภาพตัวอย่างเมื่อติดจริง รุ่น ${v}</div></div>`}
+
+/* variant sheet */
+function sheetV(){const v=S.sel,st=v?STOCK[v]:null;const miss=[];if(!v)miss.push("รุ่น");if(!S.opt)miss.push("แบบแหนบ");
+ return `<div class="shade" data-a="closeSheet"><div class="sheet" data-stop="1">
+ <div class="sh"><img class="thumb" src="${tray(v||"NEL001",200)}" style="width:84px;height:84px" alt=""><div style="flex:1;min-width:0"><div class="price" style="font-size:1.2rem">${v?money(unit()):"฿99 – ฿139"}</div>
+  <div class="mut">${v?`เลือกแล้ว: <b style="color:var(--a-fg)">${v}  ${VAR[v].st}</b>${S.opt?`  ${optTxt(S.opt)}`:""}`:"ยังไม่ได้เลือกรุ่น"}</div>${v&&S.opt?`<div class="mut">คงเหลือ ${STOCK[v][S.opt]} ชิ้น</div>`:""}</div><button class="ib" data-a="closeSheet" aria-label="ปิด">${ic.x}</button></div>
+ <div class="sv">
+  <div class="lbl" style="margin-top:0">เลือกรุ่น (6) <span class="mut" style="font-weight:400">ภาพใหญ่ + ชื่อสไตล์ + ความยาว</span> ${nI}</div>
+  <div class="vgrid">${IDS.map(id=>`<div class="vc ${v===id?"on":""}" data-a="selV" data-v="${id}" role="button" tabindex="0"><img src="${tray(id,300)}" alt=""><button class="zoom" data-a="zoom" data-v="${id}" aria-label="ดูภาพใหญ่">${ic.zoom}</button>${v===id?'<span class="ck">✓</span>':""}<b>${id}</b><span>${VAR[id].st}  ${VAR[id].len.replace(" (ยาวที่หางตา)","").replace(" (คละ)","")}</span></div>`).join("")}</div>
+  <button class="btn o" style="width:100%;margin-top:10px;display:flex;gap:6px;justify-content:center;align-items:center;border-color:#cdb8f6;color:#4b1fa6;background:var(--new-soft)" data-a="go" data-v="cpick">${ic.cmp.replace("<svg",'<svg width="18" height="18"')} ไม่แน่ใจ? เปรียบเทียบรุ่น ${nB}</button>
+  <div class="lbl" id="optlbl" style="${S.need&&!S.opt?"color:#b3261e":""}">แบบ ${S.need&&!S.opt?"← กรุณาเลือก":""}</div>
+  <div class="opt"><button class="${S.opt==="no"?"on":""}" data-a="opt" data-v="no" ${v&&!STOCK[v].no?"disabled":""}>ไม่รวมแหนบ</button><button class="${S.opt==="tw"?"on":""}" data-a="opt" data-v="tw" ${v&&!STOCK[v].tw?"disabled":""}>รวมแหนบ +฿20${v&&!STOCK[v].tw?" (หมด)":v&&STOCK[v].tw<=5?` (เหลือ ${STOCK[v].tw})`:""}</button></div>
+  <div class="between" style="margin-top:14px"><b style="font-size:.85rem">จำนวน</b><span class="qty"><button data-a="qty" data-v="-1" aria-label="ลด">−</button><span>${S.qty}</span><button data-a="qty" data-v="1" aria-label="เพิ่ม">+</button></span></div>
+   </div>
+ <div class="bar" style="flex-direction:column;align-items:stretch">${S.need&&miss.length?`<div class="alert" style="margin:0">ยังไม่ได้เลือก: <b>${miss.join(" และ ")}</b> กรุณาเลือกให้ครบก่อน</div>`:""}<button class="btn p" data-a="vNext">${S.mode==="buy"?"ซื้อเลย":"เพิ่มลงรถเข็น"}</button></div></div></div>`}
+function sheetConfirm(){const v=S.sel;return `<div class="shade" data-a="closeSheet"><div class="sheet" data-stop="1">
+ <div class="sh"><div style="flex:1"><b>ตรวจสอบตัวเลือกก่อน${S.mode==="buy"?"สั่งซื้อ":"เพิ่มลงรถเข็น"}</b> ${nB}<div class="mut">ป้องกันการเลือกผิดรุ่นโดยไม่ตั้งใจ</div></div><button class="ib" data-a="closeSheet" aria-label="ปิด">${ic.x}</button></div>
+ <div class="sv"><div class="split"><div><img src="${tray(v,300)}" alt=""><span>สินค้า</span></div><div><img src="${eye(v,300,300,0)}" alt=""><span>เมื่อติดจริง</span></div></div>
+ <table class="spec" style="margin-top:10px"><tr><td>รุ่น</td><td><b>${v}  ${VAR[v].st}</b> (${VAR[v].th})</td></tr><tr><td>ความยาว</td><td>${VAR[v].len}</td></tr><tr><td>แบบ</td><td><b>${optTxt(S.opt)}</b></td></tr><tr><td>จำนวน</td><td>${S.qty} กล่อง (${VAR[v].cnt}/กล่อง)</td></tr><tr><td>ราคารวม</td><td class="price">${money(unit()*S.qty)}</td></tr></table>
+ ${S.opt==="no"?`<div class="alert" style="background:#fffbe6;border-color:#f5d76e;color:#7a5b00">คุณเลือกแบบ <b>ไม่รวมแหนบ</b> ถ้ายังไม่มีแหนบที่บ้าน แนะนำเลือกแบบรวมแหนบ (+฿20)</div>`:""}</div>
+ <div class="bar"><button class="btn s" data-a="editSel">แก้ไขตัวเลือก</button><button class="btn p" data-a="confirmSel">ถูกต้อง ${S.mode==="buy"?"ไปชำระเงิน":"เพิ่มลงรถเข็น"}</button></div></div></div>`}
+function sheetZoom(){const v=S.zoom;return `<div class="shade" data-a="closeZoom" style="justify-content:center;padding:14px"><div class="card" data-stop="1" style="overflow:hidden"><img src="${tray(v,700)}" alt="" style="width:100%;display:block"><img src="${eye(v,700,360,1)}" alt="" style="width:100%;display:block"><div class="pad between"><div><b>${v}  ${VAR[v].st}</b><div class="mut">${VAR[v].len}  ${VAR[v].curl}</div></div><button class="btn p sm" data-a="zoomPick" data-v="${v}">เลือกรุ่นนี้</button></div></div></div>`}
+function sheetCoupon(){const best=S.cpn==="auto";return `<div class="shade" data-a="closeSheet"><div class="sheet" data-stop="1"><div class="sh"><b style="flex:1;text-align:center">ส่วนลดและคูปอง</b><button class="ib" data-a="closeSheet" aria-label="ปิด">${ic.x}</button></div>
+ <div class="sv"><div class="ai" style="background:var(--imp-soft);color:#075e53;margin:0 0 10px">ระบบเลือกคูปองที่ประหยัดที่สุดให้แล้ว และบอกเหตุผลของคูปองที่ใช้ไม่ได้</div>
+ <div class="cpn"><span class="l">ส่งฟรี</span><div><b>ลดค่าส่ง ฿38</b><div class="mut">ขั้นต่ำ ฿59  หมดอายุใน 2 ชม.</div></div><span class="rd ${best?"on":""}"></span></div>
+ <div class="cpn"><span class="l">ร้านค้า</span><div><b>ส่วนลดร้าน ฿10</b><div class="mut">ขั้นต่ำ ฿89  Lumi Lash</div></div><span class="rd ${best?"on":""}"></span></div>
+ <div class="cpn no"><span class="l">แพลตฟอร์ม</span><div><b>ลด ฿40</b><div class="mut">ขั้นต่ำ ฿300</div><ul class="why"><li>ใช้ไม่ได้: ยอดยังไม่ถึงขั้นต่ำ ขาดอีก ${money(Math.max(0,300-calc(S.cart.filter(i=>i.on&&!i.oos)).sub))}</li></ul></div><button class="btn sm s" data-a="t" data-v="ลองเพิ่มสินค้าอีก ${money(Math.max(0,300-calc(S.cart.filter(i=>i.on&&!i.oos)).sub))} เพื่อใช้คูปองนี้">ดูวิธีใช้</button></div>
+ <div class="cpn no"><span class="l">Mall</span><div><b>ลด 15% สูงสุด ฿50</b><div class="mut">เฉพาะร้าน Mall</div><ul class="why"><li>ใช้ไม่ได้: ร้านนี้ไม่ใช่ร้าน Mall</li></ul></div><span></span></div></div>
+ <div class="bar"><button class="btn p" data-a="closeSheet">ตกลง</button></div></div></div>`}
+
+/* compare */
+SC.cpick=()=>{const n=S.cmp.length;return `${topH("เลือกรุ่นที่จะเปรียบเทียบ")}
+ <div class="view"><div class="pad"><p class="mut" style="margin:0 0 10px">${nB} เลือกได้ 2–3 รุ่น  เลือกแล้ว <b>${n}/3</b></p>
+ ${IDS.map(id=>{const on=S.cmp.includes(id);return `<button class="pick ${on?"on":""}" data-a="cmpT" data-v="${id}" role="checkbox" aria-checked="${on}"><img class="thumb" src="${tray(id,160)}" style="width:60px;height:60px" alt=""><div><b>${id}</b>  ${VAR[id].st}<div class="mut">${VAR[id].len}  ${VAR[id].thick}  ฿${VAR[id].price}</div></div><span class="box">${on?"✓":""}</span></button>`}).join("")}</div></div>
+ <div class="bar"><button class="btn p" data-a="goCmp" ${n<2?"disabled":""}>เปรียบเทียบ ${n} รุ่น</button></div>`};
+SC.compare=()=>{const ids=IDS.filter(i=>S.cmp.includes(i)),cols=`grid-template-columns:repeat(${ids.length},minmax(0,1fr))`;
+ const diffK=CROWS.filter(([k])=>new Set(ids.map(i=>cval(i,k))).size>1),same=CROWS.length-diffK.length;
+ const minP=Math.min(...ids.map(i=>VAR[i].price)),maxR=Math.max(...ids.map(i=>VAR[i].rate));
+ const ICO={st:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6L20 9.3l-4 4 1 5.7-5-2.8-5 2.8 1-5.7-4-4 5.4-.7z"/></svg>',len:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>',thick:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',curl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17c3-9 13-9 16 0"/><path d="M8 13l-1-3M12 11V8M16 13l1-3"/></svg>',cnt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16M15 4v16"/></svg>',fit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>',lvl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>',glue:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg>',rv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',pr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="8" cy="8" r="1.5"/></svg>'};
+ const dots=(n,lab)=>`<span class="cdots">${[1,2,3].map(x=>`<i class="${x<=n?"on":""}"></i>`).join("")}</span><small>${lab}</small>`;
+ const meter=(i,k)=>{const n=NUM[i],v=VAR[i];
+  if(k==="len")return `<span class="cmt"><i style="left:${(n.l[0]-6)/10*100}%;width:${(n.l[1]-n.l[0])/10*100}%"></i></span><small>${v.len}</small>`;
+  if(k==="thick")return dots(n.t,v.thick);if(k==="curl")return dots(n.c,v.curl);
+  if(k==="cnt")return `<span class="cmt"><i style="left:0;width:${n.n/240*100}%"></i></span><small>${v.cnt}</small>`;
+  return cval(i,k)};
+ const rows=CROWS.map(([k,l])=>{const vals=ids.map(i=>cval(i,k)),d=new Set(vals).size>1;if(S.only&&!d)return"";
+  return `<div class="crow ${d?"d":""}"><div class="k"><span class="cico">${ICO[k]}</span>${l}${d?"<em>ต่างกัน</em>":"<u>เหมือนกัน</u>"}</div><div class="vv" style="${cols}">${ids.map((i,j)=>`<div class="${S.sel===i?"sel":""}">${meter(i,k)}</div>`).join("")}</div></div>`}).join("");
+ const card=i=>{const v=VAR[i],on=S.sel===i;return `<div class="ch ${on?"on":""}" data-a="cmpSel" data-v="${i}" role="button" tabindex="0" aria-pressed="${on}">${on?'<span class="chk"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>':""}
+  <div class="tags">${v.price===minP&&ids.length>1?'<span class="tg">ถูกสุด</span>':""}${v.rate===maxR&&ids.length>1?'<span class="tg r">รีวิวดีสุด</span>':""}</div>
+  <img src="${tray(i,260)}" alt="${i}"><img class="eye" src="${eye(i,300,200,0)}" alt="เมื่อติดจริง"><b>${i}</b><span class="cst">${v.st}</span>
+  <span class="cpr">฿${v.price}</span><span class="crt">★ ${v.rate} <span>(${v.rc.toLocaleString()})</span></span></div>`};
+ return `${topH(`เปรียบเทียบ ${ids.length} รุ่น`)}
+ <div class="view cview">
+ <div class="csum"><div class="csum-t"><span class="csum-i">${ic.cmp}</span><div><b>ต่างกัน ${diffK.length} จุด</b><small>เหมือนกัน ${same} จุด  เทียบจากข้อมูลจริงของแต่ละรุ่น</small></div></div>
+  <div class="csum-c">${diffK.map(([,l])=>`<span>${l}</span>`).join("")}</div></div>
+ <div class="pad" style="padding-top:10px"><div class="cg" style="${cols}">${ids.map(card).join("")}</div>
+ <div class="cstick" style="${cols}">${ids.map(i=>`<span class="${S.sel===i?"on":""}"><img src="${tray(i,260)}" alt="">${i}</span>`).join("")}</div>
+ <div class="between conly"><span>แสดงเฉพาะจุดที่ต่างกัน ${same?`<span class="mut">(ซ่อน ${same} แถว)</span>`:""}</span><button class="sw" role="switch" aria-checked="${S.only}" data-a="only" aria-label="แสดงเฉพาะจุดที่ต่างกัน"></button></div>
+ ${rows}
+ <div class="mut" style="margin:10px 0 2px;text-align:center">แถบสีเหลือง = จุดที่ต่างกัน  แตะการ์ดด้านบนเพื่อเลือกรุ่น</div>
+ <div class="cg" style="${cols};margin-top:8px">${ids.map(i=>`<button class="btn sm ${S.sel===i?"p":"o"}" style="flex:1;border-radius:999px" data-a="cmpSel" data-v="${i}">${S.sel===i?"✓ เลือกแล้ว":"เลือกรุ่นนี้"}</button>`).join("")}</div></div></div>
+ <div class="bar"><button class="btn s" data-a="go" data-v="cpick">เลือกรุ่นอื่น</button><button class="btn p" data-a="cmpDone" ${S.sel&&ids.includes(S.sel)?"":"disabled"}>${S.sel&&ids.includes(S.sel)?`ใช้รุ่น ${S.sel} ต่อ`:"เลือกรุ่นก่อน"}</button></div>`};
+/* finder */
+const FQ=[["คุณจะใส่ขนตาไปที่ไหนบ่อยที่สุด?",[["ทุกวัน / ทำงาน / เรียน","อยากให้ดูธรรมชาติ"],["ถ่ายรูป / ออกงาน","อยากให้ตาโตชัด"],["ปาร์ตี้ / กลางคืน","จัดเต็มได้"]]],["ลุคที่ชอบแบบไหน?",[["ธรรมชาติ ละมุน","เหมือนขนตาจริง"],["ตาโตแบบตุ๊กตา","งอนเท่ากันทั้งแถว"],["หางตาเฉี่ยว","ยาวขึ้นที่หางตา"]]],["เคยติดขนตาปลอมเองไหม?",[["ยังไม่เคย / มือใหม่","อยากได้รุ่นที่ติดง่าย"],["เคยแล้ว ติดคล่อง","รุ่นไหนก็ได้"]]]];
+function recoOf(a){const [u,l,s]=a;if(l===2)return"NEL006";if(u===2)return s===0?"NEL004":"NEL005";if(l===1||u===1)return s===0?"NEL003":"NEL004";return s===0?"NEL001":"NEL002"}
+SC.finder=()=>{const f=S.fd;if(f.i<FQ.length){const [q,ans]=FQ[f.i];return `${topH("ช่วยเลือกรุ่น")}
+ <div class="view"><div class="pad"><span class="bN">Product Finder</span><div class="stepbar" style="margin-top:10px">${FQ.map((_,i)=>`<i class="${i<=f.i?"on":""}"></i>`).join("")}</div>
+ <div class="mut" style="margin-top:10px">คำถาม ${f.i+1}/${FQ.length}</div><div class="q">${q}</div>
+ <div class="ans">${ans.map(([a,s],i)=>`<button data-a="fAns" data-v="${i}"><div><b>${a}</b><small>${s}</small></div></button>`).join("")}</div></div></div>
+ <div class="bar">${f.i>0?'<button class="btn s" data-a="fBack">ข้อก่อนหน้า</button>':""}<button class="btn s" data-a="back">ยกเลิก</button></div>`}
+ const r=recoOf(f.a),alt=r==="NEL001"?"NEL002":r==="NEL003"?"NEL001":r==="NEL005"?"NEL003":"NEL003";
+ return `${topH("รุ่นที่แนะนำสำหรับคุณ")}<div class="view"><div class="pad"><div class="reco"><img src="${eye(r,700,420,1)}" alt=""><div class="pad"><span class="bN">แนะนำ</span><div style="font-size:1.15rem;font-weight:700;margin-top:4px">${r}  ${VAR[r].st}</div><div class="mut">${VAR[r].th}  ${VAR[r].len}  ★${VAR[r].rate} (${VAR[r].rc.toLocaleString()} รีวิว)</div>
+ <ul class="why"><li>${["ดูเป็นธรรมชาติ เหมาะกับใส่ทุกวัน","ช่วยให้ตาโตชัดในรูปถ่าย","ฟูหนา เด่นในที่แสงน้อย"][f.a[0]]}</li><li>${["ทรงละมุนเหมือนขนตาจริง","งอนแบบตุ๊กตา","ยาวขึ้นที่หางตาให้ลุคเฉี่ยว"][f.a[1]]}</li><li>${f.a[2]===0?"ความง่ายในการติด: "+VAR[r].lvl+" เหมาะกับมือใหม่ แนะนำแบบรวมแหนบ":"ติดได้หลายสไตล์ เลือกแบบไม่รวมแหนบได้"}</li></ul></div></div>
+ <div class="lbl">ตัวเลือกใกล้เคียง</div><button class="pick" data-a="tryon" data-v="${alt}"><img class="thumb" src="${tray(alt,160)}" style="width:60px;height:60px" alt=""><div><b>${alt}</b>  ${VAR[alt].st}<div class="mut">${VAR[alt].len}  แตะเพื่อลองบนตา</div></div><span>›</span></button></div></div>
+ <div class="bar"><button class="btn s" data-a="fRedo">ทำใหม่</button><button class="btn s" data-a="tryon" data-v="${r}">ลองบนตา</button><button class="btn p" data-a="pickReco" data-v="${r}">เลือกรุ่นนี้</button></div>`};
+/* try-on */
+SC.tryon=()=>{const v=S.tv;return `${topH("ลองบนตา (Virtual Try-On)")}
+ <div class="view"><div class="tryimg">${S.tcmp?`<div class="split" style="padding:6px"><div><img src="${eye(null,400,400,1)}" alt=""><span>ก่อน</span></div><div><img src="${eye(v,400,400,1)}" alt=""><span>หลัง: ${v}</span></div></div>`:`<img src="${eye(v,780,620,1)}" alt="ภาพจำลองขนตา ${v} บนตา"><span class="lbl2">จำลอง ${v}  ${VAR[v].st}</span>`}</div>
+ <div class="pad"><div class="between"><b style="font-size:.88rem">เลือกรุ่นเพื่อลอง</b><button class="chip ${S.tcmp?"on":""}" data-a="tcmp">เทียบก่อน/หลัง</button></div>
+ <div class="vstrip" style="margin-top:8px">${IDS.map(id=>`<button data-a="tv" data-v="${id}" style="${v===id?"border-color:var(--red);box-shadow:0 0 0 1px var(--red)":""}"><img src="${eye(id,160,160,1)}" alt=""><b>${id}</b><br>${VAR[id].st}</button>`).join("")}</div>
+ <div class="ai" style="margin-top:12px">${VAR[v].th}  ${VAR[v].len}  ${VAR[v].curl}<br><span class="mut">ภาพจำลองจากรูปตัวอย่าง ในแอปจริงจะใช้กล้องหน้าของผู้ใช้</span></div>
+ <button class="btn s" style="width:100%;margin-top:10px" data-a="t" data-v="ขออนุญาตใช้กล้อง… (ต้นแบบใช้ภาพตัวอย่างแทน)">เปิดกล้องหน้าเพื่อลองบนตาตัวเอง</button></div></div>
+ <div class="bar"><button class="btn s" data-a="goCmpWith" data-v="${v}">เปรียบเทียบ</button><button class="btn p" data-a="pickReco" data-v="${v}">เลือก ${v}</button></div>`};
+/* chat */
+const FAQ=[["รุ่นไหนเหมาะกับมือใหม่?","มือใหม่แนะนำ NEL001 (Natural 8–10 มม.) หรือ NEL002 ค่ะ ช่อเล็ก ติดง่าย และควรเลือกแบบรวมแหนบนะคะ"],["NEL003 กับ NEL005 ต่างกันยังไง?","NEL003 Doll ยาว 10–12 มม. งอนแบบตุ๊กตา ส่วน NEL005 Glam ยาว 12–15 มม. หนากว่า เหมาะกับปาร์ตี้ค่ะ ลองกด “เปรียบเทียบรุ่น” ในหน้าสินค้าได้เลยค่ะ"],["ส่งกี่วันถึง?","ร้านแพ็คภายใน 24 ชม. ปกติถึงภายใน 2–3 วันค่ะ"],["กาวติดได้นานไหม?","กาวดำในตัวติดได้ 8–12 ชม. ใช้ซ้ำได้ 3–5 ครั้งค่ะ"]];
+SC.chat=()=>`${topH("Lumi Lash Official",`<button class="ib" data-a="t" data-v="ดูข้อมูลร้าน" aria-label="ข้อมูลร้าน">${ic.more}</button>`)}
+ <div style="background:var(--imp-soft);color:#075e53;font-size:.75rem;padding:6px 12px;flex:none">ร้านนี้ปกติตอบกลับภายใน ~5 นาที  คำถามที่พบบ่อยตอบอัตโนมัติทันที</div>
+ <div class="view chatv" id="chatv"><div class="pcard"><img class="thumb" src="${tray(S.sel||"NEL001",120)}" style="width:44px;height:44px" alt=""><div style="flex:1">ขนตาปลอมมีกาวในตัว ${S.sel||""}<br><span class="price">${money(VAR[S.sel||"NEL001"].price)}</span></div><button class="btn sm p" data-a="openProd" data-v="${S.sel||"NEL001"}">ดู</button></div>
+ <div class="msg them">สวัสดีค่ะ ยินดีต้อนรับสู่ Lumi Lash 💕 สอบถามได้เลยค่ะ</div>
+ ${S.chat.map(m=>`<div class="msg ${m.me?"me":"them"}">${m.auto?'<span class="auto">ตอบอัตโนมัติจากข้อมูลร้าน</span>':""}${m.t}</div>`).join("")}</div>
+ <div style="flex:none;padding:8px 10px 0;background:#fff"><div class="chips">${FAQ.map(([q],i)=>`<button class="chip" data-a="faq" data-v="${i}">${q}</button>`).join("")}</div></div>
+ <div class="bar"><input class="cin" id="cin" placeholder="พิมพ์ข้อความ…" aria-label="พิมพ์ข้อความ"><button class="btn sm p" data-a="send">ส่ง</button></div>`;
+/* cart */
+SC.cart=()=>{const q=S.cq.trim().toLowerCase();let items=S.cart.filter(it=>(!q||(it.name+" "+it.opt+" "+(it.v||"")).toLowerCase().includes(q))&&(S.cf==="all"||(S.cf==="sale"&&it.tag)||(S.cf==="oos"&&it.oos)||(S.cf==="lash"&&it.shop==="Lumi Lash Official")));
+ const shops=[...new Set(items.map(i=>i.shop))];const selItems=S.cart.filter(i=>i.on&&!i.oos);const sum=selItems.reduce((a,i)=>a+i.price*(i.q||1),0);const oos=S.cart.filter(i=>i.oos).length;
+ return `${topH(`รถเข็น (${cartCount()})`,`<button class="ib" data-a="t" data-v="โหมดแก้ไขรถเข็น" style="width:auto;padding:0 8px;font-size:.8rem">แก้ไข</button>`)}
+ <div style="padding:8px 12px;background:#fff;flex:none;border-bottom:1px solid var(--a-line)"><div class="search"><span style="width:16px;height:16px;display:grid">${ic.search}</span><input id="cq" placeholder="ค้นหาในรถเข็น เช่น ขนตา, NEL003" value="${S.cq}" aria-label="ค้นหาในรถเข็น"></div>
+ <div class="chips" style="margin-top:8px">${[["all","ทั้งหมด"],["lash","ร้าน Lumi Lash"],["sale","ลดราคา"],["oos","สินค้าหมด ("+oos+")"]].map(([k,l])=>`<button class="chip ${S.cf===k?"on":""}" data-a="cf" data-v="${k}">${l}</button>`).join("")}</div></div>
+ <div class="view" style="background:var(--a-soft)">${S.cart.some(i=>i.isNew)?`<div style="background:#e9f7ef;color:#11663b;font-size:.78rem;padding:8px 12px">✓ เพิ่มสินค้าแล้ว ตัวเลือกที่คุณเลือกแสดงพร้อมรูปของรุ่นนั้น</div>`:""}
+ ${shops.map(sh=>`<div class="shop"><div class="row" style="font-weight:600;font-size:.85rem">${sh} ›</div>${items.filter(i=>i.shop===sh).map(it=>`<div class="ci ${it.oos?"oos":""}"><button class="cb ${it.on?"on":""}" data-a="cOn" data-v="${it.id}" aria-label="เลือก" ${it.oos?"disabled":""}>${it.on?"✓":""}</button><img class="thumb" src="${cartImg(it)}" style="width:80px;height:80px" alt="">
+  <div style="min-width:0"><div class="nm">${it.name}</div><span class="vtag ${it.v?"hl":""}">${it.opt} ▾</span>${it.oos?'<div class="mut" style="color:#b3261e">สินค้าหมด</div>':""}
+  <div class="between" style="margin-top:4px"><span><span class="price">${money(it.price)}</span> <span class="strike">฿${it.old}</span></span>${it.oos?`<button class="btn sm s" data-a="cDel" data-v="${it.id}">ลบ</button>`:`<span class="qty"><button data-a="cq" data-v="${it.id}|-1" aria-label="ลด">−</button><span>${it.q||1}</span><button data-a="cq" data-v="${it.id}|1" aria-label="เพิ่ม">+</button></span>`}</div>
+  ${it.v?`<button class="btn sm s" style="margin-top:6px" data-a="cChange" data-v="${it.id}">เปลี่ยนตัวเลือก</button>`:""}</div></div>`).join("")}</div>`).join("")||`<p class="pad mut">ไม่พบสินค้าที่ค้นหาในรถเข็น</p>`}
+ ${!q&&S.cf==="all"?`<p class="mut" style="text-align:center;padding:8px">+ อีก 41 รายการ (ใช้ช่องค้นหาด้านบนเพื่อหาได้เร็วขึ้น)</p>`:""}</div>
+ <div class="bar"><button class="cb ${selItems.length&&selItems.length===S.cart.filter(i=>!i.oos).length?"on":""}" style="margin:0" data-a="cAll" aria-label="เลือกทั้งหมด"></button><span class="mut">ทั้งหมด</span><div style="margin-left:auto;text-align:right"><div class="price">${money(sum)}</div><div class="mut">เลือกแล้ว ${selItems.length} รายการ</div></div><button class="btn p" style="flex:none;padding:11px 16px" data-a="toCheckout" ${selItems.length?"":"disabled"}>ชำระเงิน (${selItems.length})</button></div>`};
+/* checkout */
+function calc(items){const sub=items.reduce((a,i)=>a+i.price*(i.q||1),0),orig=items.reduce((a,i)=>a+i.old*(i.q||1),0);const best=S.cpn==="auto";
+ const ship=38,shipD=best&&sub>=59?38:0,seller=best&&sub>=89?10:0;const pd=S.pay==="pl"?Math.min(20,(sub-seller)*.2):0;return{sub,orig,ship,shipD,seller,pd,tot:sub+ship-shipD-seller-pd}}
+SC.checkout=()=>{const items=S.cart.filter(i=>i.on&&!i.oos);const c=calc(items);const lash=items.find(i=>i.v);
+ return `${topH("ทำการสั่งซื้อ")}<div class="view" style="background:var(--a-soft)">
+ <div class="sec" style="padding-bottom:10px"><button class="addr" data-a="t" data-v="เปลี่ยนที่อยู่ (ข้อมูลตัวอย่าง)"><span class="lic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div><b>${ADDR.n}</b> ${ADDR.ph}<br><span class="mut">${ADDR.a}</span></div><span style="margin-left:auto">›</span></button></div><div class="stripe"></div>
+ <div class="sec">${items.map(it=>`<div class="row" style="align-items:flex-start;margin-bottom:8px"><img class="thumb" src="${cartImg(it)}" style="width:64px;height:64px" alt=""><div style="flex:1;min-width:0"><div style="font-size:.8rem;line-height:1.35">${it.name}</div><span class="vtag ${it.v?"hl":""}">${it.opt}</span><div class="between"><span class="price">${money(it.price)}</span><span class="mut">x${it.q||1}</span></div></div></div>`).join("")}
+ </div>
+ <button class="sec between" data-a="coupon" style="width:100%;border-left:0;border-right:0;border-top:0;cursor:pointer;text-align:left"><span style="display:flex;align-items:center;gap:8px"><span class="lic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a3 3 0 0 0 0 6v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a3 3 0 0 0 0-6z"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg></span>ส่วนลดและคูปอง</span><span style="color:var(--imp);font-size:.8rem">${S.cpn==="auto"?`ใช้ส่วนลดที่ดีที่สุดแล้ว -${money(c.shipD+c.seller)} ›`:"เลือกคูปอง ›"}</span></button>
+ <div class="sec"><b>สรุปยอดแบบละเอียด</b> ${nI}<div class="sum" style="margin-top:8px">
+  <span>ราคาปกติ</span><span>${money(c.orig)}</span><span>ส่วนลดสินค้า (Flash sale)</span><span class="neg">-${money(c.orig-c.sub)}</span>
+  <span>ค่าส่ง</span><span>${money(c.ship)}</span><span>คูปองส่งฟรี</span><span class="neg">-${money(c.shipD)}</span>
+  <span>ส่วนลดร้านค้า</span><span class="neg">-${money(c.seller)}</span><span>ส่วนลดจากวิธีชำระเงิน</span><span class="neg">${c.pd?"-"+money(c.pd):"฿0 <small class='mut'>(PayLater ลดเพิ่ม 20%)</small>"}</span>
+  <span class="tot">ยอดชำระสุทธิ</span><span class="tot price">${money(c.tot)}</span></div>
+  <div class="mut" style="margin-top:6px">ราคาในคลิป ${money(items[0]?items[0].price:0)} คือราคาก่อนค่าส่ง ยอดสุทธิด้านบนคือยอดที่ต้องจ่ายจริง</div></div>
+ <div class="sec"><b>วิธีชำระเงิน</b>
+  ${[["pp","QR PromptPay","#1a4b8c","QR"],["cod","เก็บเงินปลายทาง","#f08c00","COD"],["pl","PayLater ผ่อน 0%","#111","PL"],["card","บัตรเครดิต/เดบิต","#5c7cfa","CARD"]].map(([k,l,c2,t])=>`<button class="pm" data-a="pay" data-v="${k}"><span class="ic" style="background:${c2}">${t}</span><span>${l}${k==="pl"?' <span class="bI">ลด 20%</span>':""}</span><span class="rd ${S.pay===k?"on":""}"></span></button>`).join("")}</div>
+ <p class="mut pad">การกดสั่งซื้อถือว่ายอมรับเงื่อนไขการใช้งาน (ข้อความตัวอย่าง)</p></div>
+ <div class="bar"><div><div class="mut">ยอดชำระ</div><div class="price" style="font-size:1.1rem">${money(c.tot)}</div></div><button class="btn p" data-a="place">สั่งซื้อ</button></div>`};
+SC.placed=()=>{const o=S.order,it=o.items[0],n=o.items.reduce((a,i)=>a+(i.q||1),0);const pay={pp:"QR PromptPay",cod:"เก็บเงินปลายทาง",pl:"PayLater",card:"บัตรเครดิต/เดบิต"}[o.pay];
+ const steps=[["สั่งซื้อแล้ว","วันนี้ 22:16",1],["ร้านแพ็คของ","ภายใน 24 ชม.",0],["กำลังจัดส่ง","30 ต.ค.",0],["ได้รับสินค้า","31 ต.ค. – 1 พ.ย.",0]];
+ const recs=PRODS.filter(p=>!p.lash).slice(0,4);
+ return `${SB()}<div class="view" style="background:var(--a-soft)">
+ <div class="okhero"><div class="okring"><div class="big-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div><b>สั่งซื้อสำเร็จ</b><p>ขอบคุณที่สั่งซื้อกับ ${it.shop||"Lumi Lash Official"}</p><div class="okamt">${money(o.tot)}</div><span class="okpay">${o.pay==="cod"?"ชำระเมื่อได้รับสินค้า":"ชำระเงินแล้ว"}  ${pay}</span></div>
+ <div class="okcard"><div class="between"><b style="font-size:.85rem">สถานะคำสั่งซื้อ</b><span class="mut">#TS${String(o.tot*7919).slice(-8)}</span></div>
+  <div class="oksteps">${steps.map(([t,d,on],i)=>`<div class="${on?"on":""}"><i>${on?"✓":i+1}</i><b>${t}</b><small>${d}</small></div>`).join("")}</div>
+  <div class="oknote"><span class="lic">${ic.truck}</span><div>คาดว่าจะได้รับ <b>31 ต.ค. – 1 พ.ย.</b><br><span class="mut">เราจะแจ้งเตือนเมื่อร้านแพ็คของ เมื่อขนส่งรับของ และก่อนไรเดอร์มาถึง 30 นาที</span></div></div></div>
+ <div class="okcard"><b style="font-size:.85rem">สินค้าที่สั่ง (${n} ชิ้น)</b>
+  ${o.items.map(i=>`<div class="row" style="align-items:flex-start;margin-top:10px"><img class="thumb" src="${cartImg(i)}" style="width:56px;height:56px" alt=""><div style="flex:1;min-width:0"><div style="font-size:.78rem;line-height:1.35">${i.name}</div><span class="vtag ${i.v?"hl":""}">${i.opt}</span></div><div style="text-align:right"><div class="price">${money(i.price)}</div><span class="mut">x${i.q||1}</span></div></div>`).join("")}
+  <div class="okaddr"><span class="lic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div><b>${ADDR.n}</b> <span class="mut">${ADDR.ph}</span><br><span class="mut">${ADDR.a}</span></div></div></div>
+ <div class="okcard"><b style="font-size:.85rem">สินค้าที่คุณอาจชอบ</b><div class="okrec">${recs.map(p=>`<button data-a="gprod" data-v="${p.id}"><img src="${prodImg(p.img,240)}" alt=""><span>${p.name}</span><b>${money(p.price)}</b></button>`).join("")}</div></div>
+ </div>
+ <div class="bar"><button class="btn s" data-a="home">ช้อปต่อ</button><button class="btn p" data-a="go" data-v="orders">ดูคำสั่งซื้อ</button></div>`};
+/* orders */
+SC.orders=()=>{const o=S.order;const tabs=[["pay","ที่ต้องชำระ",ic.pay,0],["ship","ที่ต้องจัดส่ง",ic.box,0],["recv","ที่ต้องได้รับ",ic.truck,o&&!S.recv?1:0],["rev","รอรีวิว",ic.star,o&&S.recv?1:0],["ret","คืนสินค้า",ic.ret,S.rr?1:0]];
+ const show=S.otab;let body="";
+ if(o&&((show==="recv"&&!S.recv)||(show==="rev"&&S.recv))){const it=o.items[0];body=`<div class="sec"><div class="between"><b style="font-size:.85rem">Lumi Lash Official</b><span style="color:${S.recv?"var(--ok)":"var(--red)"};font-size:.8rem">${S.recv?"ได้รับแล้ว":"กำลังจัดส่ง"}</span></div>
+  <div class="row" style="margin-top:8px;align-items:flex-start"><img class="thumb" src="${cartImg(it)}" style="width:64px;height:64px" alt=""><div style="flex:1"><div style="font-size:.8rem">${it.name}</div><span class="vtag hl">${it.opt}</span></div><span class="mut">x${it.q||1}</span></div>
+  ${S.recv?"":`<div class="prog2">${[1,1,1,1,0].map(x=>`<i class="${x?"on":""}"></i>`).join("")}</div><div class="mut">กำลังนำส่ง  ถึงวันนี้ 10:00–12:00</div>`}
+  <div class="row" style="justify-content:flex-end;margin-top:8px">${S.recv?`<button class="btn sm s" data-a="go" data-v="inspect">ตรวจสินค้า</button><button class="btn sm p" data-a="go" data-v="review">เขียนรีวิว</button>`:`<button class="btn sm s" data-a="go" data-v="chat">ติดต่อร้าน</button><button class="btn sm p" data-a="go" data-v="track">ติดตามพัสดุ</button>`}</div></div>`}
+ else if(show==="ret"&&S.rr)body=`<div class="sec"><b>คำขอคืนสินค้า</b><div class="mut">${S.rr}</div><div class="ai">อยู่ระหว่างรอร้านตอบกลับ (ภายใน 48 ชม.)</div></div>`;
+ else body=`<p class="pad mut" style="text-align:center">${o?"ไม่มีคำสั่งซื้อในสถานะนี้":"ยังไม่มีคำสั่งซื้อ ลองสั่งซื้อจากคลิปหรือหน้าสินค้าก่อน"}</p>${o?"":`<div class="pad"><button class="btn p" style="width:100%" data-a="demoOrder">สร้างคำสั่งซื้อตัวอย่าง</button></div>`}`;
+ return `${topH("คำสั่งซื้อของฉัน",`<button class="ib" data-a="go" data-v="chat" aria-label="ข้อความ">${ic.chat}</button>`)}
+ <div class="view" style="background:var(--a-soft)"><div style="background:#fff;padding:10px 14px 0" class="between"><b>คำสั่งซื้อ</b><span class="mut">ดูทั้งหมด ›</span></div>
+ <div class="otabs">${tabs.map(([k,l,i,n])=>`<button class="${show===k?"on":""}" data-a="otab" data-v="${k}">${i}${n?'<span class="dot" style="right:10px">'+n+"</span>":""}${l}</button>`).join("")}</div>
+ <div style="height:8px"></div>${body}</div>`};
+SC.track=()=>{const it=oi();return `${topH("ติดตามพัสดุ")}<div class="view" style="background:var(--a-soft)">
+ <div class="sec"><div class="between"><div><div class="mut">เวลาที่คาดว่าจะได้รับ ${nI}</div><b style="font-size:1.05rem">วันนี้ 10:00 – 12:00</b></div><img class="thumb" src="${cartImg(it)}" style="width:52px;height:52px" alt=""></div>
+  <div class="prog2">${[1,1,1,1,0].map(x=>`<i class="${x?"on":""}"></i>`).join("")}</div><div class="mut">Flash Express  TH01234567890 (ตัวอย่าง)</div></div>
+ <div class="sec"><div class="row"><span style="width:40px;height:40px;border-radius:50%;background:#ffe3c2;display:grid;place-items:center;font-weight:700">ร</span><div style="flex:1"><b>ไรเดอร์: คุณสมชาย (ข้อมูลตัวอย่าง)</b><div class="mut">ห่างจากคุณ 3.2 กม.  ส่งอีก 4 จุดก่อนถึงคุณ</div></div></div>
+  <div class="row" style="margin-top:10px"><button class="btn s" data-a="t" data-v="โทรหาไรเดอร์ผ่านเบอร์กลาง (ต้นแบบ)">${ic.phone.replace("<svg",'<svg width="16" height="16" style="vertical-align:-3px"')} โทร</button><button class="btn s" data-a="t" data-v="ส่งข้อความถึงไรเดอร์: “ฝากไว้ที่ป้อม รปภ.”">แชตไรเดอร์</button><button class="btn s" data-a="t" data-v="ตั้งจุดวางพัสดุ: หน้าประตูห้อง">จุดวางพัสดุ</button></div>
+  <button class="between" data-a="remind" style="width:100%;margin-top:10px;background:none;border:0;cursor:pointer;padding:0;text-align:left;font-size:.82rem"><span>${ic.bell.replace("<svg",'<svg width="18" height="18" style="vertical-align:-4px"')} แจ้งเตือนก่อนไรเดอร์มาถึง 30 นาที ${nI}</span><span class="sw" role="switch" aria-checked="${S.remind}"></span></button></div>
+ <div class="sec"><ul class="tl">
+  <li class="now"><span class="c">●</span><div><b>กำลังนำส่ง</b><span>วันนี้ 08:12  ไรเดอร์รับพัสดุออกจากสาขาแล้ว</span></div></li>
+  <li class="done"><span class="c">✓</span><div><b>ถึงสาขาปลายทาง</b><span>เมื่อวาน 21:40  สาขาตัวอย่าง</span></div></li>
+  <li class="done"><span class="c">✓</span><div><b>ขนส่งรับพัสดุแล้ว</b><span>เมื่อวาน 15:02</span></div></li>
+  <li class="done"><span class="c">✓</span><div><b>ร้านแพ็คสินค้าแล้ว</b><span>เมื่อวาน 11:30</span></div></li>
+  <li class="done"><span class="c">✓</span><div><b>สั่งซื้อสำเร็จ</b><span>2 วันก่อน 22:17</span></div></li></ul></div></div>
+ <div class="bar"><button class="btn p" data-a="deliver">จำลอง: ไรเดอร์ส่งพัสดุถึงแล้ว</button></div>`};
+SC.delivered=()=>`${topH("ส่งพัสดุสำเร็จ")}<div class="view" style="background:var(--a-soft)">
+ <div class="sec"><b style="color:var(--ok)">✓ ส่งสำเร็จ วันนี้ 10:29</b><div class="mut">ผู้รับ: ลูกค้า  วางไว้หน้าประตูห้องตามที่ตั้งไว้</div></div>
+ <div class="sec"><div class="lbl" style="margin-top:0">รูปยืนยันการส่งจากไรเดอร์ ${nI}</div><img src="${thing("parcel",600)}" alt="รูปพัสดุวางหน้าประตู" style="width:100%;border-radius:10px;display:block"><div class="mut" style="margin-top:4px">ถ่ายเมื่อ 10:29  พิกัดตรงกับที่อยู่จัดส่ง</div></div>
+ <div class="sec"><div class="ai">${S.recv?"✓ คุณยืนยันว่าได้รับพัสดุแล้ว":"กรุณายืนยันว่าได้รับพัสดุ ถ้าไม่พบพัสดุ กด “ไม่พบพัสดุ” ภายใน 48 ชม. เพื่อให้ทีมงานตรวจสอบ"}</div></div></div>
+ <div class="bar">${S.recv?`<button class="btn p" data-a="go" data-v="inspect">แกะกล่องและตรวจสินค้า</button>`:`<button class="btn s" data-a="t" data-v="ส่งเรื่องไม่พบพัสดุให้ทีมงานแล้ว จะติดต่อกลับภายใน 24 ชม.">ไม่พบพัสดุ</button><button class="btn p" data-a="recv">ได้รับพัสดุแล้ว</button>`}</div>`;
+SC.inspect=()=>{const it=oi(),v=it.v;if(!v){const items=[["m",`ตัวเลือกตรงกับที่สั่ง (${it.opt})`],["c",`จำนวนครบ (${it.q||1} ชิ้น)`],["d","สินค้าและบรรจุภัณฑ์ไม่เสียหาย"]];const all=items.every(([k])=>S.chk[k]);
+ return `${topH("ตรวจสินค้าหลังแกะกล่อง")}<div class="view" style="background:var(--a-soft)"><div class="sec"><div class="lbl" style="margin-top:0">สิ่งที่คุณสั่ง ใช้เทียบกับของจริง ${nI}</div><img src="${it.gp!=null?gImg(PRODS.find(x=>x.id===it.gp),it.go,400):cartImg(it)}" style="width:60%;border-radius:10px;display:block;margin:0 auto" alt=""><table class="spec" style="margin-top:8px"><tr><td>สินค้า</td><td>${it.name}</td></tr><tr><td>ตัวเลือก</td><td><b>${it.opt}</b></td></tr><tr><td>จำนวน</td><td>${it.q||1}</td></tr></table></div>
+ <div class="sec"><b>เช็กลิสต์ตรวจสินค้า</b>${items.map(([k,l])=>`<button class="chk ${S.chk[k]?"on":""}" data-a="chk" data-v="${k}"><span class="b">${S.chk[k]?"✓":""}</span>${l}</button>`).join("")}</div></div>
+ <div class="bar"><button class="btn s" data-a="go" data-v="return">มีปัญหา แจ้งคืน</button><button class="btn p" data-a="inspOk" ${all?"":"disabled"}>${all?"ตรงทั้งหมด เขียนรีวิว":"ติ๊กให้ครบก่อน"}</button></div>`}const items=[["m",`รุ่นตรงกับที่สั่ง (${v}  ${VAR[v].st})`],["c",`จำนวนตรง (${VAR[v].cnt})`],["t",it.o==="tw"?"มีแหนบในกล่อง":"ไม่มีแหนบ (ตามที่สั่ง)"],["d","สินค้าและบรรจุภัณฑ์ไม่เสียหาย"]];const all=items.every(([k])=>S.chk[k]);
+ return `${topH("ตรวจสินค้าหลังแกะกล่อง")}<div class="view" style="background:var(--a-soft)">
+ <div class="sec"><div class="lbl" style="margin-top:0">สิ่งที่คุณสั่ง ใช้เทียบกับของจริง ${nI}</div><div class="split"><div><img src="${tray(v,300)}" alt=""><span>${v}</span></div><div><img src="${eye(v,300,300,0)}" alt=""><span>เมื่อติดจริง</span></div></div>
+  <table class="spec" style="margin-top:8px"><tr><td>รุ่น</td><td><b>${v}  ${VAR[v].st}</b></td></tr><tr><td>ความยาว</td><td>${VAR[v].len}</td></tr><tr><td>แบบ</td><td>${optTxt(it.o)}</td></tr><tr><td>จำนวน</td><td>${it.q||1} กล่อง  ${VAR[v].cnt}/กล่อง</td></tr></table></div>
+ <div class="sec"><b>เช็กลิสต์ตรวจสินค้า</b>${items.map(([k,l])=>`<button class="chk ${S.chk[k]?"on":""}" data-a="chk" data-v="${k}"><span class="b">${S.chk[k]?"✓":""}</span>${l}</button>`).join("")}</div></div>
+ <div class="bar"><button class="btn s" data-a="go" data-v="return">มีปัญหา แจ้งคืน</button><button class="btn p" data-a="inspOk" ${all?"":"disabled"}>${all?"ตรงทั้งหมด เขียนรีวิว":"ติ๊กให้ครบก่อน"}</button></div>`};
+SC.review=()=>{const it=oi();return `${topH("เขียนรีวิว")}<div class="view"><div class="pad">
+ <div class="row"><img class="thumb" src="${cartImg(it)}" style="width:56px;height:56px" alt=""><div><div style="font-size:.82rem">${it.name}</div><span class="vtag hl">ตัวเลือก: ${it.opt}</span></div></div>
+ <div class="starsel" style="margin:14px 0 4px;text-align:center">${[1,2,3,4,5].map(n=>`<button class="${n<=S.stars?"on":""}" data-a="star" data-v="${n}" aria-label="${n} ดาว">★</button>`).join("")}</div>
+ <div class="lbl">รุ่นนี้เหมาะกับใคร ${nB}</div><div class="chips" style="flex-wrap:wrap">${["มือใหม่ติดง่าย","ใส่ทุกวัน","ถ่ายรูปสวย","ตรงตามภาพ","ยาวกว่าที่คิด"].map(t=>`<button class="chip" data-a="tagTog">${t}</button>`).join("")}</div>
+ <div class="lbl">รายละเอียด</div><textarea class="ta" id="rtx" placeholder="เล่าประสบการณ์การใช้รุ่นนี้…">${S.rtx}</textarea>
+ <div class="lbl">รูปของจริง</div><div class="row"><button class="upl" data-a="upl">＋ เพิ่มรูป</button><img id="uplimg" class="thumb" src="${!it.v?cartImg(it):eye(it.v,170,170,2)}" style="width:84px;height:84px;display:${S.upl?"block":"none"}" alt=""></div></div></div>
+ <div class="bar"><button class="btn p" data-a="sendRev">ส่งรีวิว (+6 โบนัส)</button></div>`};
+SC.return=()=>{const rs=["ได้รับสินค้าผิดรุ่น","จำนวนไม่ครบ","สินค้าเสียหาย","ไม่ตรงกับรูป/รายละเอียด","เปลี่ยนใจ"];return `${topH("ขอคืนสินค้า/คืนเงิน")}<div class="view" style="background:var(--a-soft)">
+ <div class="sec"><div class="ai" style="margin:0">ขั้นตอนเหลือ 3 ขั้น: เลือกเหตุผล → แนบรูป → ส่งคำขอ ระบบกรอกข้อมูลคำสั่งซื้อให้แล้ว</div></div>
+ <div class="sec"><b>เหตุผล</b>${rs.map(r=>`<button class="pm" data-a="rr" data-v="${r}"><span>${r}</span><span class="rd ${S.rrs===r?"on":""}"></span></button>`).join("")}</div>
+ <div class="sec"><b>รูปหลักฐาน</b> <span class="mut">(ระบบแนบรูปสินค้าที่คุณสั่งไว้เทียบให้อัตโนมัติ)</span><div class="row" style="margin-top:8px"><img class="thumb" src="${cartImg(oi())}" style="width:84px;height:84px" alt=""><button class="upl" data-a="t" data-v="เปิดกล้อง/คลังรูป (ต้นแบบ)">＋ รูปของที่ได้รับ</button></div></div>
+ <div class="sec"><div class="between"><span>ยอดคืนเงิน</span><b class="price">${money(S.order.tot)}</b></div><div class="mut">คืนเข้าช่องทางเดิมภายใน 3–5 วันทำการ</div></div></div>
+ <div class="bar"><button class="btn p" data-a="sendRet" ${S.rrs?"":"disabled"}>ส่งคำขอคืนสินค้า</button></div>`};
+
+/* ---------- actions ---------- */
+function go(s,keep){if(!keep)S.stack.push(S.scr);S.scr=s;S.sheet=null;render(true)}
+function addLashToCart(){const v=S.sel,id="L"+v+S.opt;const ex=S.cart.find(i=>i.id===id);S.cart.forEach(i=>{i.isNew=false;i.on=false});
+ if(ex){ex.q=(ex.q||1)+S.qty;ex.on=true;ex.isNew=true;S.cart=[ex,...S.cart.filter(i=>i!==ex)]}else S.cart.unshift({id,shop:"Lumi Lash Official",name:"ขนตาปลอมมีกาวในตัว รุ่นกาวดำ 1 กล่อง 120–240 ช่อ",opt:`${v}  ${VAR[v].st}, ${optTxt(S.opt)}`,v,o:S.opt,price:unit(),old:ORIG,img:"lash",q:S.qty,on:true,isNew:true,tag:"ลดราคา"})}
+const A={
+ tab(v){S.stack=[];S.sheet=null;S.scr=v;render(true)},
+ create(){toast("เปิดกล้องสร้างคลิป (ต้นแบบนี้เน้นส่วนการซื้อสินค้า)")},
+ hsearch(){const el=document.getElementById("hq");S.hq=el?el.value:"";S.hcat="all";render(true)},
+ hclear(){S.hq="";render(true)},
+ hkw(v){S.hq=v;render(true)},
+ hcat(v){S.hcat=v;render()},
+ hTile(a){({coupons:()=>toast("เก็บคูปองส่งฟรี ฿38 แล้ว ใช้ได้ตอนชำระเงิน"),orders:()=>go("orders"),inbox:()=>A.tab("inbox"),later:()=>toast("PayLater: วงเงินคงเหลือ ฿20,000 (ตัวอย่าง)"),addr:()=>toast("ที่อยู่จัดส่ง: "+ADDR.a),live:()=>A.tab("feed"),mall:()=>{S.hcat="all";S.hq="";toast("แสดงสินค้าจากร้าน Mall");render()},flash:()=>A.gprod("p5"),follow:()=>A.tab("feed")})[a]()},
+ gprod(id){S.gp=id;S.gopt=null;S.grf=null;S.gq=1;S.gneed=false;go("gprod")},
+ gopt(i){S.gopt=+i;render()},
+ gq(d){S.gq=Math.max(1,Math.min(20,S.gq+ +d));render()},
+ gadd(mode){if(S.gopt==null){S.gneed=true;render();return}S.gmode=mode;A.gConfirm()},
+ gConfirm(){const mode=S.gmode;const p=PRODS.find(x=>x.id===S.gp),o=S.gopt,id="g"+p.id+o,ex=S.cart.find(i=>i.id===id);S.sheet=null;S.cart.forEach(i=>{i.isNew=false;if(mode==="buy")i.on=false});
+  if(ex){ex.q=(ex.q||1)+S.gq;ex.on=true;ex.isNew=true;S.cart=[ex,...S.cart.filter(i=>i!==ex)]}else S.cart.unshift({id,shop:p.shop,name:p.name,opt:optName(p,o),price:optPrice(p,o),old:p.old,img:p.img,gp:p.id,go:o,q:S.gq,on:true,isNew:true,tag:"ลดราคา"});
+  if(mode==="buy"){go("checkout");return}snack(`เพิ่ม ${optName(p,o)} x${S.gq} ลงรถเข็นแล้ว`)},
+ gcmpOpen(){const p=PRODS.find(x=>x.id===S.gp);const n=p.opts.length;S.gcmp=n<=3?[...Array(n).keys()]:(S.gopt!=null&&S.gopt>2?[S.gopt-2,S.gopt-1,S.gopt]:[0,1,2]);go("gcompare")},
+ gcmpT(v){v=+v;const i=S.gcmp.indexOf(v);if(i>=0){if(S.gcmp.length<=2){toast("ต้องเลือกอย่างน้อย 2 ตัวเลือก");return}S.gcmp.splice(i,1)}else if(S.gcmp.length<3)S.gcmp.push(v);else toast("เลือกได้สูงสุด 3 ตัวเลือก");render()},
+ gonly(){S.gonly=!S.gonly;render()},
+ gcSel(v){S.gopt=+v;render()},
+ gcDone(){A.back();toast("เลือกแล้ว ตรวจสเปกและกดเพิ่มลงรถเข็นได้เลย")},
+ gsize(){S.gsz=null;S.gfit="fit";go("gsize")},
+ gsz(v){S.gsz=+v;render()},
+ gfit(v){S.gfit=v;render()},
+ gszUse(v){S.gopt=+v;A.back();toast("เลือกไซซ์ที่แนะนำแล้ว")},
+ grevJump(){const e=document.getElementById("grev");if(e)e.scrollIntoView({behavior:"smooth",block:"start"})},
+ grf(v){S.grf=v==="all"?null:+v;render()},
+ dm(id){S.read[id]=1;if(id==="lumi"){go("chat");return}S.dmid=id;go("dm")},
+ dmShop(n){let c=CONTACTS.find(x=>x.n===n);if(!c){c={id:"s"+CONTACTS.length,n,shop:1,av:8+CONTACTS.length,time:"ตอนนี้",seed:["สวัสดีค่ะ ยินดีต้อนรับสู่ "+n+" สอบถามได้เลยค่ะ"]};CONTACTS.push(c)}A.dm(c.id)},
+ dmq(t){dmPush(t)},
+ dmShare(){dmPush("ดูขนตารุ่นนี้ดิ NEL003 Doll ตาโตมาก 🛍")},
+ dmSend(){const el=document.getElementById("dmin");const t=(el&&el.value||"").trim();if(!t){toast("พิมพ์ข้อความก่อนส่ง");return}dmPush(t)},
+ inboxSys(a){if(a==="followers")toast("ผู้ติดตามใหม่: ปอนด์, เจน, ต้น, มีมี่");else if(a==="activity")A.tab("profile");else if(S.order)go("orders");else A.tab("shophome")},
+ prtab(v){S.prtab=v;render()},
+ back(){if(S.stack.length){S.scr=S.stack.pop();S.sheet=null;render(true)}else toast("หน้าแรกแล้ว")},
+ home(){S.stack=[];S.scr="feed";S.sheet=null;render(true)},
+ go(v){go(v)},
+ t(v){toast(v)},
+ like(){const b=document.getElementById("lk");if(b){b.style.color=b.style.color?"":"#ff3b5c";document.getElementById("lkn").textContent=b.style.color?"6,709":"6,708"}},
+ fromVideo(){S.sel="NEL001";S.from="video";S.ptab="ov";go("product")},
+ openProd(v){S.sel=v;S.from="search";S.ptab="ov";go("product")},
+ ptab(v){S.ptab=v;render(true)},
+ pickStrip(v){S.sel=v;S.from="";render()},
+ openV(v){S.mode=v;S.need=false;S.sheet="v";render()},
+ closeSheet(){S.sheet=null;render()},
+ selV(v){S.sel=v;S.from="";if(S.opt&&!STOCK[v][S.opt]){S.opt=null;toast("แบบที่เลือกไว้หมด กรุณาเลือกแบบใหม่")}render()},
+ opt(v){S.opt=v;render()},
+ qty(d){S.qty=Math.max(1,Math.min(S.sel&&S.opt?STOCK[S.sel][S.opt]:99,S.qty+ +d));render()},
+ zoom(v){S.zoom=v;S.prevSheet=S.sheet;S.sheet="zoom";render()},
+ closeZoom(){S.sheet=S.prevSheet||null;render()},
+ zoomPick(v){S.sel=v;S.sheet="v";render()},
+ vNext(){if(!S.sel||!S.opt){S.need=true;render();const l=document.getElementById("optlbl");if(l&&!S.opt)l.scrollIntoView({block:"center",behavior:"smooth"});return}A.confirmSel()},
+ editSel(){S.sheet="v";render()},
+ confirmSel(){addLashToCart();S.sheet=null;S.cf="all";S.cq="";if(S.mode==="buy"){go("checkout")}else{S.snack=`เพิ่ม ${S.sel}  ${optTxt(S.opt)} x${S.qty} ลงรถเข็นแล้ว`;render();clearTimeout(S._sn);S._sn=setTimeout(()=>{S.snack=null;render()},5000);const d=document.getElementById("cdot");if(d)d.animate([{transform:"scale(1.8)"},{transform:"scale(1)"}],{duration:500})}},
+ snackCart(){S.snack=null;go("cart")},
+ closeSnack(){S.snack=null;render()},
+ cmpT(v){const i=S.cmp.indexOf(v);if(i>=0)S.cmp.splice(i,1);else if(S.cmp.length<3)S.cmp.push(v);else toast("เลือกได้สูงสุด 3 รุ่น");render()},
+ goCmp(){go("compare")},
+ goCmpWith(v){if(!S.cmp.includes(v)){if(S.cmp.length>=3)S.cmp.shift();S.cmp.push(v)}if(S.cmp.length<2)S.cmp.unshift(v==="NEL001"?"NEL003":"NEL001");go("compare")},
+ only(){S.only=!S.only;render()},
+ cmpSel(v){S.sel=v;render()},
+ cmpDone(){S.mode=S.mode||"cart";S.need=false;S.stack.push(S.scr);S.scr="product";S.ptab="ov";S.sheet="v";render(true);toast(`เลือก ${S.sel} แล้ว เลือกแบบแหนบต่อได้เลย`)},
+ finder(){S.fd={i:0,a:[]};go("finder")},
+ fAns(i){S.fd.a[S.fd.i]=+i;S.fd.i++;render(true)},
+ fBack(){S.fd.i=Math.max(0,S.fd.i-1);render(true)},
+ fRedo(){S.fd={i:0,a:[]};render(true)},
+ tryon(v){S.tv=v||"NEL003";S.tcmp=false;go("tryon")},
+ tv(v){S.tv=v;render()},
+ tcmp(){S.tcmp=!S.tcmp;render()},
+ pickReco(v){S.sel=v;S.from="";S.need=false;S.stack.push(S.scr);S.scr="product";S.ptab="ov";S.sheet="v";render(true);toast(`เลือก ${v} แล้ว เลือกแบบแหนบต่อได้เลย`)},
+ rf(v){S.rf=v;render()},
+ rph(){S.rph=!S.rph;render()},
+ faq(i){const [q,a]=FAQ[+i];S.chat.push({me:1,t:q});render();setTimeout(()=>{S.chat.push({t:a,auto:1});if(S.scr==="chat")render();scrollChat()},450);scrollChat()},
+ send(){const el=document.getElementById("cin");const t=(el&&el.value||"").trim();if(!t){toast("พิมพ์ข้อความก่อนส่ง");return}S.chat.push({me:1,t});render();scrollChat();setTimeout(()=>{S.chat.push({t:"ได้รับข้อความแล้วค่ะ แอดมินจะตอบภายในประมาณ 5 นาทีนะคะ",auto:1});if(S.scr==="chat")render();scrollChat()},500)},
+ cf(v){S.cf=v;render()},
+ cOn(id){const it=S.cart.find(i=>i.id===id);it.on=!it.on;render()},
+ cAll(){const av=S.cart.filter(i=>!i.oos);const all=av.every(i=>i.on);av.forEach(i=>i.on=!all);render()},
+ cq(v){const[id,d]=v.split("|");const it=S.cart.find(i=>i.id===id);it.q=Math.max(1,(it.q||1)+ +d);render()},
+ cDel(id){S.cart=S.cart.filter(i=>i.id!==id);toast("ลบสินค้าที่หมดแล้ว");render()},
+ cChange(id){const it=S.cart.find(i=>i.id===id);S.sel=it.v;S.opt=it.o;S.qty=it.q||1;S.cart=S.cart.filter(i=>i.id!==id);S.mode="cart";S.need=false;S.sheet="v";render()},
+ toCheckout(){go("checkout")},
+ coupon(){S.sheet="coupon";render()},
+ pay(v){S.pay=v;render()},
+ place(){const items=S.cart.filter(i=>i.on&&!i.oos);const c=calc(items);S.order={items:items.map(i=>({...i})),tot:c.tot,pay:S.pay};S.cart=S.cart.filter(i=>!(i.on&&!i.oos));S.recv=false;S.chk={};S.rr=null;S.otab="recv";S.stack=[];go("placed",1)},
+ demoOrder(){S.sel="NEL003";S.opt="tw";S.qty=1;S.order={items:[{id:"d",name:"ขนตาปลอมมีกาวในตัว รุ่นกาวดำ 1 กล่อง 120–240 ช่อ",opt:"NEL003  Doll, รวมแหนบ",v:"NEL003",o:"tw",price:129,old:258,img:"lash",q:1}],tot:119,pay:"pp"};S.recv=false;S.otab="recv";render(true)},
+ otab(v){S.otab=v;render()},
+ remind(){S.remind=!S.remind;toast(S.remind?"เปิดแจ้งเตือนก่อนส่ง 30 นาที":"ปิดแจ้งเตือนก่อนส่งแล้ว");render()},
+ deliver(){go("delivered")},
+ recv(){S.recv=true;S.otab="rev";toast("ขอบคุณที่ยืนยันการรับพัสดุ");render()},
+ chk(k){S.chk[k]=!S.chk[k];render()},
+ inspOk(){go("review")},
+ star(n){S.stars=+n;render()},
+ tagTog(_,el){el.classList.toggle("on")},
+ upl(){S.upl=1;render()},
+ sendRev(){const it=oi();if(!it.v){toast("✓ ส่งรีวิวแล้ว ได้รับ 6 โบนัส");S.stack=[];S.otab="rev";go("orders",1);return}toast("✓ ส่งรีวิวแล้ว");REVIEWS.unshift({u:"ส***จ",c:"#ee2f53",v:oi().v,o:optTxt(oi().o),s:S.stars,t:(document.getElementById("rtx")||{}).value||"ได้ตรงตามรุ่นที่เลือก ใช้ง่ายมาก",ph:S.upl?1:0});S.rf=oi().v;S.sel=oi().v;S.ptab="rv";S.stack=["feed"];S.scr="product";render(true)},
+ rr(v){S.rrs=v;render()},
+ sendRet(){S.rr=S.rrs+"  ส่งคำขอแล้ว";S.otab="ret";toast("ส่งคำขอคืนสินค้าแล้ว");S.stack=[];go("orders",1)}
+};
+function snack(m){S.snack=m;render();clearTimeout(S._sn);S._sn=setTimeout(()=>{S.snack=null;render()},5000);const d=document.getElementById("cdot");if(d)d.animate([{transform:"scale(1.8)"},{transform:"scale(1)"}],{duration:500})}
+const REPLIES=["ได้เลยยย","จริงดิ 555","โอเคๆ","สวยอะ เดี๋ยวสั่งด้วย","เดี๋ยวตอบนะ กำลังเรียน"];
+function dmPush(t){const id=S.dmid;(S.dms[id]=S.dms[id]||[]).push({me:1,t});render();scrollChat();const c=CONTACTS.find(x=>x.id===id);
+ setTimeout(()=>{(S.dms[id]).push({t:c.shop?"ได้รับข้อความแล้วค่ะ แอดมินจะตอบกลับโดยเร็วนะคะ":REPLIES[Math.floor(Math.random()*REPLIES.length)]});if(S.scr==="dm"&&S.dmid===id){render();scrollChat()}},700)}
+const oi=()=>S.order.items.find(i=>i.v)||S.order.items[0];
+function scrollChat(){requestAnimationFrame(()=>{const c=document.getElementById("chatv");if(c)c.scrollTop=c.scrollHeight})}
+
+/* ---------- render ---------- */
+const TP=[
+ ["TP1","ค้นพบสินค้าผ่านวิดีโอ","Online",[["คลิปสินค้า","feed"],["หน้าร้านค้นหา","shophome"]],"ลิงก์ในคลิปพาไปรุ่นเดียวกับในวิดีโอ"],
+ ["TP2","ศึกษารายละเอียดและรีวิว","Online",[["หน้าสินค้า","product"],["รีวิวแยกรุ่น","reviews"],["ข้อมูลมาตรฐาน","desc"]],"รีวิวกรองตามรุ่น + สรุปรีวิวรายรุ่น + สเปกครบ"],
+ ["TP3","สอบถามร้านค้าผ่านแชต","Online",[["แชตร้าน","chat"]],"แสดงเวลาตอบโดยประมาณ + FAQ ตอบทันที"],
+ ["TP4","เลือกสินค้า","Online",[["เลือกตัวเลือก","sheetv"],["เปรียบเทียบ","compare"],["ช่วยเลือก","finder"],["ลองบนตา","tryon"],["ยืนยันตัวเลือก","confirm"]],"จุดหลักของ HMW 1: ครบ 5 Solution จาก Mind Map"],
+ ["TP5","จัดการตะกร้าสินค้า","Online",[["รถเข็น","cart"]],"ค้นหา/กรองในรถเข็น + ป้ายตัวเลือกพร้อมรูป"],
+ ["TP6","ตรวจคำสั่งซื้อ โปรโมชัน ชำระเงิน","Online",[["ชำระเงิน","checkout"],["คูปอง","coupon"]],"เลือกคูปองดีที่สุดอัตโนมัติ + บอกเหตุผลที่ใช้ไม่ได้ + ยอดละเอียด"],
+ ["TP7","ติดตามสถานะคำสั่งซื้อ","Online",[["คำสั่งซื้อ","orders"],["ติดตามพัสดุ","track"]],"เวลาที่คาดว่าจะได้รับชัดเจน + ไทม์ไลน์"],
+ ["TP8","จัดส่งและรับพัสดุ","Offline",[["ส่งสำเร็จ","delivered"]],"แจ้งเตือนก่อนส่ง 30 นาที + รูปยืนยัน + ยืนยันการรับ"],
+ ["TP9","แกะกล่องและตรวจสินค้า","Offline",[["ตรวจสินค้า","inspect"],["รีวิว","review"],["คืนสินค้า","return"]],"รูปสิ่งที่สั่งไว้เทียบ + เช็กลิสต์ + คืนสินค้า 3 ขั้น"]];
+const SCR2TP={feed:0,shophome:0,product:1,chat:2,cpick:3,compare:3,finder:3,tryon:3,cart:4,checkout:5,placed:5,orders:6,track:6,delivered:7,inspect:8,review:8,return:8};
+function ensureOrder(){if(!S.order)A.demoOrder()}
+function jump(k){S.sheet=null;S.stack=["feed"];
+ const need=()=>{if(!S.sel)S.sel="NEL003";if(!S.opt)S.opt="tw"};
+ switch(k){case"reviews":S.ptab="rv";S.rf="NEL003";S.scr="product";S.sel=S.sel||"NEL003";break;case"desc":S.ptab="ds";S.scr="product";S.sel=S.sel||"NEL003";break;case"product":S.ptab="ov";S.scr="product";break;
+  case"sheetv":S.ptab="ov";S.scr="product";S.mode="cart";S.need=false;S.sheet="v";break;case"confirm":need();S.scr="product";S.ptab="ov";S.mode="cart";S.sheet="confirm";break;
+  case"compare":S.scr="compare";break;case"finder":S.fd={i:0,a:[]};S.scr="finder";break;case"tryon":S.scr="tryon";break;
+  case"cart":if(!S.cart.some(i=>i.v)){need();S.qty=1;addLashToCart()}S.scr="cart";break;
+  case"checkout":case"coupon":if(!S.cart.some(i=>i.on&&!i.oos)){need();S.qty=1;addLashToCart()}S.scr="checkout";if(k==="coupon")S.sheet="coupon";break;
+  case"orders":ensureOrder();S.otab=S.recv?"rev":"recv";S.scr="orders";break;case"track":ensureOrder();S.recv=false;S.scr="track";break;
+  case"delivered":ensureOrder();S.scr="delivered";break;case"inspect":ensureOrder();S.recv=true;S.scr="inspect";break;case"review":ensureOrder();S.recv=true;S.scr="review";break;case"return":ensureOrder();S.recv=true;S.scr="return";break;
+  default:S.scr=k}
+ render(true)}
+let lastScr=null;
+function render(reset){
+ const v0=app.querySelector(".view"),keep=!reset&&v0&&lastScr===S.scr?v0.scrollTop:0;
+ const cqFocus=document.activeElement&&document.activeElement.id==="cq",hqFocus=document.activeElement&&document.activeElement.id==="hq";
+ app.innerHTML=SC[S.scr]();lastScr=S.scr;
+ const v1=app.querySelector(".view");if(v1)v1.scrollTop=keep;
+ sheetEl.innerHTML=S.sheet==="v"?sheetV():S.sheet==="confirm"?sheetConfirm():S.sheet==="zoom"?sheetZoom():S.sheet==="coupon"?sheetCoupon():S.sheet==="gconf"?sheetGConfirm():"";
+ if(cqFocus){const c=document.getElementById("cq");c.focus();c.setSelectionRange(c.value.length,c.value.length)}
+ if(hqFocus){const c=document.getElementById("hq");if(c){c.focus();c.setSelectionRange(c.value.length,c.value.length)}}
+ const cur=SCR2TP[S.scr];
+ const tpl=document.getElementById("tplist");if(tpl)tpl.innerHTML=TP.map(([n,t,ty,js,fx],i)=>`<li class="${i===cur?"on":""}"><div class="h"><span class="n">${n}</span><b>${t}</b><span class="ty">${ty}</span></div><div class="fx">${fx}</div><div class="jumps">${js.map(([l,k])=>`<button data-j="${k}">${l}</button>`).join("")}</div></li>`).join("");
+ if(S.scr==="chat"||S.scr==="dm")scrollChat();
+ if(S.snack&&!S.sheet)sheetEl.innerHTML=`<div class="snack"><span>✓ ${S.snack}</span><button data-a="snackCart">ดูรถเข็น</button></div>`;
+}
+document.addEventListener("click",e=>{
+ const j=e.target.closest("[data-j]");if(j){e.preventDefault();jump(j.dataset.j);return}
+ const el=e.target.closest("[data-a]");if(!el)return;
+ if(el.classList.contains("shade")&&e.target.closest("[data-stop]"))return;
+ if(el.disabled)return;
+ e.preventDefault();e.stopPropagation();const f=A[el.dataset.a];if(f)f(el.dataset.v,el)});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches('[role="button"][data-a]')){e.preventDefault();e.target.click()}
+ if(e.key==="Enter"&&e.target.id==="cin")A.send();if(e.key==="Enter"&&e.target.id==="dmin")A.dmSend();if(e.key==="Enter"&&e.target.id==="hq")A.hsearch()});
+document.addEventListener("input",e=>{if(e.target.id==="cq"){S.cq=e.target.value;render()}if(e.target.id==="hq"){S.hq=e.target.value;render(true)}if(e.target.id==="rtx")S.rtx=e.target.value});
+render(true);
+</script>
+</body></html>
